@@ -4,6 +4,7 @@ import { getDb } from '../db';
 import { submissions, targets } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { del } from '@vercel/blob';
 
 function safeRevalidate(path: string) {
   try {
@@ -49,9 +50,30 @@ export async function createSubmissionAction(data: {
 export async function deleteSubmissionAction(submissionId: string, targetId: string, yearNumber: number) {
   const db = await getDb();
 
+  // 1. Fetch submission record to get the image URL before deletion
+  const existingSubmissions = await db
+    .select()
+    .from(submissions)
+    .where(eq(submissions.id, submissionId));
+  const submission = existingSubmissions[0];
+
+  // 2. If it's a hosted Vercel Blob URL and token is configured, delete from blob storage
+  if (
+    submission?.imageUrl &&
+    submission.imageUrl.startsWith('https://') &&
+    process.env.BLOB_READ_WRITE_TOKEN
+  ) {
+    try {
+      await del(submission.imageUrl);
+    } catch (err) {
+      console.warn('Failed to delete blob from Vercel storage:', err);
+    }
+  }
+
+  // 3. Delete database record
   await db.delete(submissions).where(eq(submissions.id, submissionId));
 
-  // Check if target still has any remaining submissions
+  // 4. Check if target still has any remaining submissions
   const remaining = await db
     .select()
     .from(submissions)
