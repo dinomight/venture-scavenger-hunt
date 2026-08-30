@@ -4,6 +4,7 @@ import { years } from './db/schema';
 import { eq } from 'drizzle-orm';
 
 const COOKIE_PREFIX = 'venture_session_';
+const ADMIN_COOKIE_NAME = 'venture_admin_session';
 
 /**
  * Check if the user has unlocked access to a specific hunt year
@@ -12,6 +13,46 @@ export async function isYearUnlocked(year: number): Promise<boolean> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(`${COOKIE_PREFIX}${year}`);
   return sessionCookie?.value === 'unlocked';
+}
+
+/**
+ * Check if the user has master admin clearance
+ */
+export async function isAdminUnlocked(): Promise<boolean> {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get(ADMIN_COOKIE_NAME);
+  return sessionCookie?.value === 'unlocked';
+}
+
+/**
+ * Validate master admin PIN / passphrase
+ */
+export function validateAdminPin(inputPin: string): boolean {
+  if (!inputPin) return false;
+  const configuredPin = (process.env.ADMIN_PIN || 'VENTURE').trim().toUpperCase();
+  return inputPin.trim().toUpperCase() === configuredPin;
+}
+
+/**
+ * Set master admin clearance session cookie
+ */
+export async function unlockAdminSession(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set(ADMIN_COOKIE_NAME, 'unlocked', {
+    httpOnly: false,
+    secure: false,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+  });
+}
+
+/**
+ * Revoke master admin clearance
+ */
+export async function lockAdminSession(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete(ADMIN_COOKIE_NAME);
 }
 
 /**

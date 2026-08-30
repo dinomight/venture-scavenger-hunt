@@ -7,7 +7,6 @@ interface HomePageProps {
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const activeYear = await getActiveYear();
-  const yearToRedirect = activeYear ? activeYear.year : 2026;
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const params = new URLSearchParams();
 
@@ -22,5 +21,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   }
 
   const queryString = params.toString();
-  redirect(`/${yearToRedirect}${queryString ? `?${queryString}` : ''}`);
+
+  if (!activeYear) {
+    redirect(`/admin${queryString ? `?${queryString}` : ''}`);
+  }
+
+  redirect(`/${activeYear.year}${queryString ? `?${queryString}` : ''}`);
 }

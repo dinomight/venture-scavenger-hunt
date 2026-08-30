@@ -69,7 +69,10 @@ export async function createYearSession(data: {
 
   await db.insert(years).values(newYear);
   safeRevalidate('/');
+  safeRevalidate('/admin');
+  safeRevalidate(`/admin/${data.year}`);
   safeRevalidate(`/${data.year}`);
+  safeRevalidate(`/${data.year}/admin`);
   return newYear;
 }
 
@@ -99,6 +102,8 @@ export async function updateYearSettings(
 
   await db.update(years).set(updates).where(eq(years.year, yearNumber));
   safeRevalidate('/');
+  safeRevalidate('/admin');
+  safeRevalidate(`/admin/${yearNumber}`);
   safeRevalidate(`/${yearNumber}`);
   safeRevalidate(`/${yearNumber}/admin`);
   return await getYearByNumber(yearNumber);

@@ -1,5 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { isYearUnlocked } from '@/lib/session';
 import { getAllYears, getYearByNumber } from '@/lib/actions/years';
 import { HeaderNav } from '@/components/layout/HeaderNav';
@@ -38,12 +39,12 @@ export default async function YearLayout({
             <p className="text-sm text-slate-600 mb-4 font-medium">
               No scavenger hunt session has been created for DragonCon {yearNumber} yet.
             </p>
-            <a
-              href={`/${yearNumber}/admin`}
+            <Link
+              href={`/admin/${yearNumber}`}
               className="inline-block bg-orange-600 hover:bg-orange-500 text-white font-bold uppercase text-xs px-4 py-2.5 rounded border-2 border-slate-900 shadow-retro-sm"
             >
               Initialize {yearNumber} Hunt
-            </a>
+            </Link>
           </div>
         </main>
       </div>

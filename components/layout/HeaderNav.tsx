@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { VentureIcon } from '../ui/VentureIcon';
 import { CarpetPattern } from '../ui/CarpetPattern';
-import { Settings, ShieldAlert, Archive } from 'lucide-react';
+import { Settings, Archive } from 'lucide-react';
 
 interface HeaderNavProps {
   currentYear: number;
@@ -48,6 +48,12 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center gap-2">
+          {isLocked && (
+            <div className="flex items-center gap-1 bg-red-950/80 text-red-200 text-[10px] font-mono px-2 py-1 rounded border border-red-700">
+              <span className="font-bold">LOCKED</span>
+            </div>
+          )}
+
           {/* Year Selector Dropdown if multiple years */}
           {availableYears.length > 1 && (
             <div className="relative flex items-center">
@@ -72,23 +78,14 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           )}
 
           {/* Admin / Settings Link */}
-          {!isLocked && (
-            <Link
-              href={`/${currentYear}/admin`}
-              className="flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold uppercase tracking-wider px-2.5 py-1.5 rounded border-2 border-slate-900 shadow-retro-sm active:translate-x-px active:translate-y-px active:shadow-none"
-              title="Manage Target List"
-            >
-              <Settings className="h-3.5 w-3.5 text-amber-400" />
-              <span className="hidden sm:inline">Admin</span>
-            </Link>
-          )}
-
-          {isLocked && (
-            <div className="flex items-center gap-1 bg-red-900 text-red-200 text-xs font-mono px-2 py-1 rounded border border-red-700">
-              <ShieldAlert className="h-3.5 w-3.5 text-amber-400" />
-              <span className="hidden sm:inline">LOCKED</span>
-            </div>
-          )}
+          <Link
+            href={`/admin/${currentYear}`}
+            className="flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold uppercase tracking-wider px-2.5 py-1.5 rounded border-2 border-slate-900 shadow-retro-sm active:translate-x-px active:translate-y-px active:shadow-none"
+            title="Organizer Command Console"
+          >
+            <Settings className="h-3.5 w-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Admin</span>
+          </Link>
         </div>
       </div>
     </header>

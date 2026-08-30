@@ -1,7 +1,7 @@
 import React from 'react';
-import { getTargetsForYear } from '../../lib/actions/targets';
-import { getYearByNumber } from '../../lib/actions/years';
-import { HuntView } from '../../components/hunt/HuntView';
+import { getTargetsForYear } from '@/lib/actions/targets';
+import { getYearByNumber } from '@/lib/actions/years';
+import { HuntView } from '@/components/hunt/HuntView';
 
 interface YearPageProps {
   params: Promise<{ year: string }>;

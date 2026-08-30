@@ -4,6 +4,7 @@ import { getAllYears, getYearByNumber, createYearSession, updateYearSettings } f
 import { getTargetsForYear, createTarget, bulkImportTargets, deleteTarget } from '../lib/actions/targets';
 import { createSubmissionAction, deleteSubmissionAction } from '../lib/actions/submissions';
 import { getRankMilestone } from '../lib/utils/rank-titles';
+import { validateAdminPin } from '../lib/session';
 
 async function runTests() {
   console.log('--- STARTING VERIFICATION TESTS ---');
@@ -119,6 +120,14 @@ async function runTests() {
   console.log('8. Cleaning up test target...');
   await deleteTarget(customTarget.id, 2026);
   console.log('✓ Test target cleaned up.');
+
+  // 9. Test Master Admin Clearance PIN validation
+  console.log('9. Testing Master Admin Clearance PIN validation...');
+  if (!validateAdminPin('VENTURE')) throw new Error('Default admin PIN VENTURE failed to validate');
+  if (!validateAdminPin('venture')) throw new Error('Case-insensitive admin PIN failed to validate');
+  if (validateAdminPin('INVALID_PIN')) throw new Error('Invalid admin PIN unexpectedly passed');
+  if (validateAdminPin('')) throw new Error('Empty admin PIN unexpectedly passed');
+  console.log('✓ Master Admin Clearance PIN validation succeeded.');
 
   console.log('\n========================================');
   console.log('ALL VERIFICATION TESTS PASSED SUCCESSFULLY!');

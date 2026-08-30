@@ -76,6 +76,8 @@ export async function createTarget(data: {
   await db.insert(targets).values(newTarget);
   safeRevalidate(`/${data.yearNumber}`);
   safeRevalidate(`/${data.yearNumber}/admin`);
+  safeRevalidate('/admin');
+  safeRevalidate(`/admin/${data.yearNumber}`);
   return newTarget;
 }
 
@@ -119,6 +121,8 @@ export async function bulkImportTargets(
 
   safeRevalidate(`/${yearNumber}`);
   safeRevalidate(`/${yearNumber}/admin`);
+  safeRevalidate('/admin');
+  safeRevalidate(`/admin/${yearNumber}`);
   return { count: newTargets.length };
 }
 
@@ -127,5 +131,7 @@ export async function deleteTarget(targetId: string, yearNumber: number) {
   await db.delete(targets).where(eq(targets.id, targetId));
   safeRevalidate(`/${yearNumber}`);
   safeRevalidate(`/${yearNumber}/admin`);
+  safeRevalidate('/admin');
+  safeRevalidate(`/admin/${yearNumber}`);
   return { success: true };
 }

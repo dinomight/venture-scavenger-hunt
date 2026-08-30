@@ -69,7 +69,7 @@ This project is a lightweight, mobile-first web application designed for a singl
   - Instant text search across character names, descriptions, and notes.
 - **Photo Gallery View**: Ability to switch between a checklist view and a visual photo grid of all captured cosplays.
 
-### 4.5 Access Control & Shared Lobby Codes
+### 4.5 Access Control & Organizer Administration
 - **Lobby-Style Join Code**:
   - Each yearly session is protected by a short, memorable join code (e.g., `VENTURE26` or a 4–6 character code).
   - Unauthenticated visitors hitting a hunt URL (e.g., `/2026`) are presented with a simple "Enter Lobby Code" gate before viewing targets or photos.
@@ -77,6 +77,11 @@ This project is a lightweight, mobile-first web application designed for a singl
   - Once the correct code is entered, the session is saved locally in the browser (via cookie / localStorage) so participants do not need to re-enter it on every visit.
 - **Frictionless Invite URLs**:
   - Organizers can share direct invite links with the join code included as a query parameter (e.g., `/2026?join=VENTURE26`) to auto-authenticate friends with a single click.
+- **Dedicated Top-Level `/admin` Command Console**:
+  - Centralized admin sessions dashboard at `/admin` accessible independently of yearly lobby join codes to resolve initial setup dependency loops.
+  - Dedicated Session List Page (`/admin`) displaying all annual conventions with metadata, target counts, quick live hunt links, and new session creation.
+  - Dedicated Session Editor Page (`/admin/:year`) for isolated management of session settings, join codes, target goals, single additions, bulk ingestion, and target checklist maintenance with direct navigation back to all sessions.
+  - Protected by a master organizer clearance passphrase / PIN (default `VENTURE` or `ADMIN_PIN` env var) with session lock/unlock controls.
 
 ---
 
@@ -103,6 +108,7 @@ This project is a lightweight, mobile-first web application designed for a singl
 ### In Scope (MVP)
 - Shareable year-specific hunt sessions (`/:year`) with header year archive switcher.
 - Shared lobby / join code access gate with browser persistence and optional invite link query parameter.
+- Dedicated top-level organizer command console (`/admin`) with master clearance PIN protection.
 - Bulk list entry & editing for the target checklist, with configurable required target goal counts.
 - Single mobile photo upload per checklist item with camera trigger and direct thumbnail lightbox preview.
 - Mission Progress Gauge and rank milestones calculated against the required target subset, featuring bonus overdrive indicators when exceeded.

@@ -44,6 +44,8 @@ export async function createSubmissionAction(data: {
 
   safeRevalidate(`/${data.yearNumber}`);
   safeRevalidate(`/${data.yearNumber}/admin`);
+  safeRevalidate('/admin');
+  safeRevalidate(`/admin/${data.yearNumber}`);
   return newSubmission;
 }
 
@@ -88,5 +90,7 @@ export async function deleteSubmissionAction(submissionId: string, targetId: str
 
   safeRevalidate(`/${yearNumber}`);
   safeRevalidate(`/${yearNumber}/admin`);
+  safeRevalidate('/admin');
+  safeRevalidate(`/admin/${yearNumber}`);
   return { success: true };
 }
