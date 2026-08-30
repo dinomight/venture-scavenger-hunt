@@ -5,7 +5,7 @@ import { RetroCard } from '../ui/RetroCard';
 import { RetroButton } from '../ui/RetroButton';
 import { BadgeRibbon } from '../ui/BadgeRibbon';
 import { type TargetWithSubmissions } from '@/lib/actions/targets';
-import { Camera, CheckCircle2, User, HelpCircle } from 'lucide-react';
+import { Camera, CheckCircle2, User, Quote } from 'lucide-react';
 
 interface TargetCardProps {
   target: TargetWithSubmissions;
@@ -65,15 +65,15 @@ export const TargetCard: React.FC<TargetCardProps> = ({
         </div>
       </div>
 
-      {/* Target Character Name & Hint */}
+      {/* Target Character Name & Quote */}
       <div className="mb-4">
         <h3 className="text-base sm:text-lg font-black uppercase tracking-tight text-slate-900 leading-snug">
           {target.name}
         </h3>
         {target.description && (
-          <p className="mt-1 text-xs text-slate-600 font-medium italic flex items-start gap-1">
-            <HelpCircle className="h-3.5 w-3.5 shrink-0 text-slate-400 mt-0.5" />
-            <span>{target.description}</span>
+          <p className="mt-1.5 text-xs text-slate-600 font-medium italic flex items-start gap-1.5">
+            <Quote className="h-3.5 w-3.5 shrink-0 text-amber-500 mt-0.5 rotate-180" />
+            <span>&ldquo;{target.description.replace(/^["“”']|["“”']$/g, '')}&rdquo;</span>
           </p>
         )}
       </div>

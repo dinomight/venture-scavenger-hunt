@@ -26,7 +26,7 @@ export const BulkTargetModal: React.FC<BulkTargetModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Parse lines: line can be "Name", "Name [Category]", or "Name, Category, Description"
+  // Parse lines: line can be "Name", "Name [Category]", or "Name, Category, Quote"
   const parseLines = (text: string) => {
     const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
     return lines.map((line) => {
@@ -40,7 +40,7 @@ export const BulkTargetModal: React.FC<BulkTargetModalProps> = ({
         };
       }
 
-      // Check CSV: "Name, Category, Description"
+      // Check CSV: "Name, Category, Quote"
       if (line.includes(',')) {
         const parts = line.split(',').map((p) => p.trim());
         return {
@@ -106,8 +106,12 @@ export const BulkTargetModal: React.FC<BulkTargetModalProps> = ({
             Paste your list of cosplayers below. One target per line. You can format as{' '}
             <code className="bg-slate-200 px-1 py-0.5 rounded text-slate-900 font-mono">
               Name [Category]
-            </code>{' '}
-            or simply one character name per line.
+            </code>
+            , CSV{' '}
+            <code className="bg-slate-200 px-1 py-0.5 rounded text-slate-900 font-mono">
+              Name, Category, Quote
+            </code>
+            , or simply one character name per line.
           </p>
 
           <div className="space-y-4">

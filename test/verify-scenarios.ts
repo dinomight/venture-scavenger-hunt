@@ -59,7 +59,7 @@ async function runTests() {
     yearNumber: 2026,
     name: 'Henchman 24 Ghost',
     categoryTag: 'Henchmen',
-    description: 'Hovering near the Stanza with harpoon wound',
+    description: "I don't think this is a good idea, 21.",
   });
   if (!customTarget.id) throw new Error('Target creation failed');
   console.log(`✓ Created single target: "${customTarget.name}" (${customTarget.id})`);
@@ -67,7 +67,7 @@ async function runTests() {
   // 5. Test Bulk Import
   console.log('5. Testing bulk import...');
   const bulkData = [
-    { name: 'Dr. Jonas Venture Jr. in mechanical suit', categoryTag: 'Team Venture', description: 'At the Hyatt concourse' },
+    { name: 'Dr. Jonas Venture Jr. in mechanical suit', categoryTag: 'Team Venture', description: "My father's dream was a world of super-science!" },
     { name: 'Colonel Gentleman with cane', categoryTag: 'Original Team Venture' },
     { name: 'Underbheit in metallic jaw', categoryTag: 'Guild of Calamitous Intent' },
   ];

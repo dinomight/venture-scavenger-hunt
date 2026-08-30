@@ -41,7 +41,8 @@ This project is a lightweight, mobile-first web application designed for a singl
   - Ability to quickly import or create the annual list (e.g., bulk paste line-by-line, CSV upload, or manual entry).
 - **Target Item Fields**:
   - Item Title / Character Name (e.g., "Brock Samson in speedo", "Dr. Girlfriend (Season 1)").
-  - Optional hints, notes, or category tags (e.g., "The Monarch's Henchmen", "Guild of Calamitous Intent").
+  - Character Quote: A funny or famous quote from the character (e.g., "Go ahead. Take it from me.", "Feel the wrath of the Monarch!").
+  - Optional category tags (e.g., "The Monarch's Henchmen", "Guild of Calamitous Intent").
   - Status indicator (`Found` / `Needed`).
 
 ### 4.3 Photo Submission & Collaboration

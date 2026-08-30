@@ -353,11 +353,11 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
               <div>
                 <label className="block text-[11px] font-mono font-bold uppercase text-slate-900 mb-1">
-                  Location Hint / Description (Optional)
+                  Character Quote (Optional)
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Usually at Marriott atrium"
+                  placeholder='e.g. "Go ahead. Take it from me."'
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
                   className="w-full text-xs bg-venture-cream border-2 border-slate-900 rounded p-2 focus:outline-none focus:border-orange-600 font-medium"
@@ -513,7 +513,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         </div>
                         {target.description && (
                           <p className="text-[11px] text-slate-500 truncate italic">
-                            {target.description}
+                            &ldquo;{target.description.replace(/^["“”']|["“”']$/g, '')}&rdquo;
                           </p>
                         )}
                       </div>
