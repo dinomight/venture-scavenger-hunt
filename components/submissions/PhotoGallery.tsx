@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { type TargetWithSubmissions } from '../../lib/actions/targets';
+import { type TargetWithSubmissions } from '@/lib/actions/targets';
 import { User, Camera } from 'lucide-react';
 import { type LightboxPhoto } from './Lightbox';
 
@@ -39,7 +39,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
 
   if (allPhotos.length === 0) {
     return (
-      <div className="bg-white border-2 border-slate-900 rounded-lg p-12 text-center shadow-[3px_3px_0px_0px_#0f172a]">
+      <div className="bg-white border-2 border-slate-900 rounded-lg p-12 text-center shadow-retro">
         <div className="h-12 w-12 rounded-full bg-amber-100 text-amber-700 mx-auto flex items-center justify-center mb-3 border-2 border-slate-900">
           <Camera className="h-6 w-6" />
         </div>
@@ -61,7 +61,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
           <div
             key={`${target.id}-${sub.id}`}
             onClick={() => onOpenLightbox(globalIndex)}
-            className="group cursor-pointer bg-white p-3 pb-4 rounded-md border-2 border-slate-900 shadow-[3px_3px_0px_0px_#0f172a] hover:shadow-[5px_5px_0px_0px_#ea580c] hover:-translate-y-0.5 transition-all flex flex-col justify-between"
+            className="group cursor-pointer bg-white p-3 pb-4 rounded-md border-2 border-slate-900 shadow-retro hover:shadow-[5px_5px_0px_0px_#ea580c] hover:-translate-y-0.5 transition-all flex flex-col justify-between"
           >
             {/* Polaroid Photo Frame */}
             <div className="relative aspect-square w-full overflow-hidden rounded bg-slate-950 border border-slate-900 mb-2.5">

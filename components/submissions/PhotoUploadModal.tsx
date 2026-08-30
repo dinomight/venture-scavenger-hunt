@@ -156,7 +156,7 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm overflow-y-auto">
       <div className="relative w-full max-w-md my-auto animate-in fade-in zoom-in-95 duration-150">
-        <RetroCard className="bg-[#FAF7F2] p-5 sm:p-6 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a]">
+        <RetroCard className="bg-venture-cream p-5 sm:p-6 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a]">
           {/* Header */}
           <div className="flex items-center justify-between border-b-2 border-slate-900 pb-3 mb-4">
             <div className="flex items-center gap-2">
@@ -200,7 +200,7 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full flex flex-col items-center justify-center p-6 border-3 border-dashed border-slate-400 bg-white hover:bg-amber-50/40 rounded-lg cursor-pointer transition-all active:scale-[0.99]"
                 >
-                  <div className="h-12 w-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-2 border-2 border-slate-900 shadow-[2px_2px_0px_0px_#0f172a]">
+                  <div className="h-12 w-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-2 border-2 border-slate-900 shadow-retro-sm">
                     <Camera className="h-6 w-6" />
                   </div>
                   <span className="text-sm font-black uppercase tracking-wider text-slate-900">
@@ -211,7 +211,7 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                   </span>
                 </button>
               ) : (
-                <div className="relative rounded-lg overflow-hidden border-2 border-slate-900 bg-slate-950 shadow-[3px_3px_0px_0px_#0f172a]">
+                <div className="relative rounded-lg overflow-hidden border-2 border-slate-900 bg-slate-950 shadow-retro">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={previewUrl}
@@ -235,7 +235,7 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
 
             {/* Photographer Name (Remembers user) */}
             <div>
-              <label className="block text-[11px] font-mono font-bold uppercase text-slate-900 mb-1 flex items-center gap-1">
+              <label className="text-[11px] font-mono font-bold uppercase text-slate-900 mb-1 flex items-center gap-1">
                 <User className="h-3.5 w-3.5 text-slate-500" />
                 Photographer / Spotted By (Optional)
               </label>
@@ -250,7 +250,7 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
 
             {/* Optional Caption */}
             <div>
-              <label className="block text-[11px] font-mono font-bold uppercase text-slate-900 mb-1 flex items-center gap-1">
+              <label className="text-[11px] font-mono font-bold uppercase text-slate-900 mb-1 flex items-center gap-1">
                 <MessageSquare className="h-3.5 w-3.5 text-slate-500" />
                 Caption / Location Note (Optional)
               </label>
@@ -265,7 +265,7 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
 
             {/* Progress Display */}
             {isUploading && (
-              <div className="space-y-1.5 bg-slate-900 text-white p-3 rounded-md border-2 border-slate-900 font-mono text-xs shadow-[2px_2px_0px_0px_#0f172a]">
+              <div className="space-y-1.5 bg-slate-900 text-white p-3 rounded-md border-2 border-slate-900 font-mono text-xs shadow-retro-sm">
                 <div className="flex items-center justify-between text-amber-300 font-bold">
                   <span className="flex items-center gap-1.5">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />

@@ -8,8 +8,8 @@ import { TargetCard } from '../targets/TargetCard';
 import { PhotoGallery } from '../submissions/PhotoGallery';
 import { PhotoUploadModal } from '../submissions/PhotoUploadModal';
 import { Lightbox, type LightboxPhoto } from '../submissions/Lightbox';
-import { type TargetWithSubmissions } from '../../lib/actions/targets';
-import { deleteSubmissionAction } from '../../lib/actions/submissions';
+import { type TargetWithSubmissions } from '@/lib/actions/targets';
+import { deleteSubmissionAction } from '@/lib/actions/submissions';
 import { Search } from 'lucide-react';
 
 interface HuntViewProps {
@@ -176,7 +176,7 @@ export const HuntView: React.FC<HuntViewProps> = ({
       {viewMode === 'list' ? (
         <div>
           {filteredTargets.length === 0 ? (
-            <div className="bg-white border-2 border-slate-900 rounded-lg p-10 text-center shadow-[3px_3px_0px_0px_#0f172a]">
+            <div className="bg-white border-2 border-slate-900 rounded-lg p-10 text-center shadow-retro">
               <Search className="h-8 w-8 mx-auto text-slate-400 mb-2" />
               <h3 className="text-sm font-black uppercase text-slate-900">
                 No matching cosplayers found

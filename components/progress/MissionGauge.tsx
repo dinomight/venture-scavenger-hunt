@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { RetroCard } from '../ui/RetroCard';
-import { getRankMilestone } from '../../lib/utils/rank-titles';
+import { getRankMilestone } from '@/lib/utils/rank-titles';
 import { Zap, Award, Sparkles } from 'lucide-react';
 
 interface MissionGaugeProps {
@@ -22,7 +22,7 @@ export const MissionGauge: React.FC<MissionGaugeProps> = ({
   const milestone = getRankMilestone(percentage);
 
   return (
-    <RetroCard className="bg-[#FAF7F2] border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] p-4 sm:p-5 mb-6">
+    <RetroCard className="bg-venture-cream border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] p-4 sm:p-5 mb-6">
       {/* Top Readout Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-slate-900 pb-3 mb-3">
         <div className="flex items-center gap-2">
@@ -49,7 +49,7 @@ export const MissionGauge: React.FC<MissionGaugeProps> = ({
 
         {/* Milestone Rank Pill */}
         <div
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded border-2 text-xs font-mono font-black uppercase shadow-[2px_2px_0px_0px_#0f172a] ${milestone.colorClass}`}
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded border-2 text-xs font-mono font-black uppercase shadow-retro-sm ${milestone.colorClass}`}
         >
           <Award className="h-3.5 w-3.5 shrink-0" />
           <span>{milestone.title}</span>
@@ -71,7 +71,7 @@ export const MissionGauge: React.FC<MissionGaugeProps> = ({
             </span>
           )}
           {isOverdrive && (
-            <span className="inline-flex items-center gap-1 bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 text-white text-[11px] font-black uppercase px-2 py-0.5 rounded border border-slate-900 shadow-[1px_1px_0px_0px_#0f172a] ml-1">
+            <span className="inline-flex items-center gap-1 bg-linear-to-r from-purple-600 via-pink-600 to-amber-500 text-white text-[11px] font-black uppercase px-2 py-0.5 rounded border border-slate-900 shadow-[1px_1px_0px_0px_#0f172a] ml-1">
               <Sparkles className="h-3 w-3 text-amber-300" />
               +{found - goal} Bonus!
             </span>
