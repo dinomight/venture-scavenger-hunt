@@ -19,7 +19,7 @@ This project is a lightweight, mobile-first web application designed for a singl
 - **Friend / Participant**:
   - Enter the shared yearly join/lobby code (or open an invite link containing the code) to access the hunt.
   - View the list of target cosplayers and overall progress.
-  - Upload photos for specific target items.
+  - Upload a sighting photo for an unspotted target item (strictly one picture per target).
   - Optionally enter their name/nickname when uploading to record who snapped the photo.
 - **Organizer / Admin (Friend managing the list)**:
   - Create a new year session and set the shared join code (or admin passphrase).
@@ -54,7 +54,7 @@ This project is a lightweight, mobile-first web application designed for a singl
   - Photographer name / credit (optional text input or remembered locally in browser).
   - Timestamp of upload.
   - Optional caption or location notes (e.g., "Spotted at Marriott Atrium").
-- **Single Photo per Item**: Restrict checklist targets to a single photo sighting to keep the hunt simple and focused.
+- **Single Photo per Item**: Restrict checklist targets strictly to a single photo sighting (there can only be one picture per target; once captured, further uploads for that target are locked unless the existing photo is deleted) to keep the hunt simple and focused.
 - **Direct Thumbnail Expansion**: Clicking directly on a target's sighting photo opens the full image in a high-resolution lightbox without requiring a separate view button.
 - **Optimized Delivery**: Responsive thumbnails and image caching via `next/image` to minimize client bandwidth and stay well within free hosting limits.
 
@@ -110,7 +110,7 @@ This project is a lightweight, mobile-first web application designed for a singl
 - Shared lobby / join code access gate with browser persistence and optional invite link query parameter.
 - Dedicated top-level organizer command console (`/admin`) with master clearance PIN protection.
 - Bulk list entry & editing for the target checklist, with configurable required target goal counts.
-- Single mobile photo upload per checklist item with camera trigger and direct thumbnail lightbox preview.
+- Single mobile photo upload per checklist item (strictly one picture per target) with camera trigger and direct thumbnail lightbox preview.
 - Mission Progress Gauge and rank milestones calculated against the required target subset, featuring bonus overdrive indicators when exceeded.
 - Search and filter by completion status.
 - Lightbox / full-screen photo viewer.

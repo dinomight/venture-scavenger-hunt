@@ -19,14 +19,16 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
   const photoMap: { target: TargetWithSubmissions; photoIndex: number; globalIndex: number }[] = [];
 
   for (const target of targets) {
-    for (let i = 0; i < target.submissions.length; i++) {
-      const sub = target.submissions[i];
+    if (target.submissions.length > 0) {
+      const sub = target.submissions[0];
       photoMap.push({
         target,
-        photoIndex: i,
+        photoIndex: 0,
         globalIndex: allPhotos.length,
       });
       allPhotos.push({
+        id: sub.id,
+        targetId: sub.targetId,
         imageUrl: sub.imageUrl,
         targetName: target.name,
         categoryTag: target.categoryTag,

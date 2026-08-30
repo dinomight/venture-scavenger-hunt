@@ -94,6 +94,27 @@ async function runTests() {
   }
   console.log(`✓ Submission logged. Target status updated to FOUND with photographer credit: ${updatedCustomTarget.submissions[0].photographerName}`);
 
+  // 6a. Verify Single Photo Constraint (reject duplicate submission)
+  console.log('6a. Testing rejection of duplicate photo submission for already found target...');
+  let duplicateRejected = false;
+  try {
+    await createSubmissionAction({
+      targetId: customTarget.id,
+      yearNumber: 2026,
+      imageUrl: 'https://placehold.co/800x600/png?text=DuplicatePhoto',
+      photographerName: 'Dean',
+    });
+  } catch (err: unknown) {
+    const e = err as Error;
+    if (e.message.includes('already has a sighting photo')) {
+      duplicateRejected = true;
+    }
+  }
+  if (!duplicateRejected) {
+    throw new Error('Duplicate submission was not rejected for already found target');
+  }
+  console.log('✓ Successfully rejected duplicate photo submission for target.');
+
   // 6b. Test Photo Submission Deletion
   console.log('6b. Testing Sighting submission deletion & reset to NEEDED...');
   await deleteSubmissionAction(subResult.id, customTarget.id, 2026);

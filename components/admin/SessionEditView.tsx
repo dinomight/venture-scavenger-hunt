@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { RetroCard } from '../ui/RetroCard';
@@ -144,13 +144,20 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
     });
   };
 
-  const inviteLink =
-    typeof window !== 'undefined'
-      ? `${window.location.origin}/${yearNumber}?join=${yearData.joinCode}`
-      : `/${yearNumber}?join=${yearData.joinCode}`;
+  const origin = useSyncExternalStore(
+    () => () => {},
+    () => window.location.origin,
+    () => ''
+  );
+
+  const invitePath = `/${yearNumber}?join=${yearData.joinCode}`;
+  const inviteLink = origin ? `${origin}${invitePath}` : invitePath;
 
   const copyInviteLink = async () => {
-    const success = await copyToClipboard(inviteLink);
+    const fullLink = typeof window !== 'undefined'
+      ? `${window.location.origin}${invitePath}`
+      : invitePath;
+    const success = await copyToClipboard(fullLink);
     if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
@@ -454,39 +461,41 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
                 {initialTargets.map((target, idx) => (
                   <div
                     key={target.id}
-                    className="p-3 flex items-center justify-between gap-2 hover:bg-slate-50 transition-colors"
+                    className="p-3 flex items-start sm:items-center justify-between gap-2 hover:bg-slate-50 transition-colors"
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="text-[11px] font-mono font-black text-slate-400 w-5 shrink-0 text-right">
+                    <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
+                      <span className="text-[11px] font-mono font-black text-slate-400 w-5 shrink-0 text-right pt-0.5 sm:pt-0">
                         #{idx + 1}
                       </span>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-xs font-black uppercase text-slate-900 truncate">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                          <h4 className="text-xs font-black uppercase text-slate-900 break-words sm:truncate">
                             {target.name}
                           </h4>
                           {target.categoryTag && (
-                            <span className="text-[9px] font-mono font-bold bg-slate-200 text-slate-700 px-1 rounded uppercase shrink-0">
-                              {target.categoryTag}
-                            </span>
+                            <div className="flex items-center">
+                              <span className="text-[9px] font-mono font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded uppercase shrink-0">
+                                {target.categoryTag}
+                              </span>
+                            </div>
                           )}
                         </div>
                         {target.description && (
-                          <p className="text-[11px] text-slate-500 italic truncate flex items-center gap-1 mt-0.5">
-                            <Quote className="h-2.5 w-2.5 text-amber-500 shrink-0 inline" />
+                          <p className="text-[11px] text-slate-500 italic break-words sm:truncate flex items-start gap-1 mt-1 sm:mt-0.5">
+                            <Quote className="h-2.5 w-2.5 text-amber-500 shrink-0 mt-0.5" />
                             <span>&ldquo;{target.description}&rdquo;</span>
                           </p>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 pt-0.5 sm:pt-0">
                       {target.submissions && target.submissions.length > 0 ? (
-                        <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-300">
-                          {target.submissions.length} PHOTO(S)
+                        <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-300 whitespace-nowrap">
+                          FOUND
                         </span>
                       ) : (
-                        <span className="text-[10px] font-mono font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded border border-amber-300">
+                        <span className="text-[10px] font-mono font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded border border-amber-300 whitespace-nowrap">
                           NEEDED
                         </span>
                       )}
@@ -529,7 +538,7 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
               from the DragonCon {yearNumber} scavenger hunt list?
             </p>
             <p className="text-xs text-red-600 font-mono">
-              All associated sighting submissions for this target will also be removed.
+              Any associated sighting photo for this target will also be removed.
             </p>
           </div>
         </RetroModal>

@@ -10,7 +10,7 @@ import { Camera, CheckCircle2, User, Quote } from 'lucide-react';
 interface TargetCardProps {
   target: TargetWithSubmissions;
   onUploadClick: (target: TargetWithSubmissions) => void;
-  onViewPhotoClick: (target: TargetWithSubmissions, initialIndex?: number) => void;
+  onViewPhotoClick: (target: TargetWithSubmissions) => void;
 }
 
 export const TargetCard: React.FC<TargetCardProps> = ({
@@ -19,7 +19,7 @@ export const TargetCard: React.FC<TargetCardProps> = ({
   onViewPhotoClick,
 }) => {
   const isFound = target.submissions.length > 0 || target.status === 'FOUND';
-  const latestSubmission = target.submissions[target.submissions.length - 1];
+  const sightingSubmission = target.submissions[0];
 
   const getCategoryVariant = (category?: string | null) => {
     if (!category) return 'neutral';
@@ -79,16 +79,16 @@ export const TargetCard: React.FC<TargetCardProps> = ({
       </div>
 
       {/* Sighting Photo Preview if Available */}
-      {isFound && latestSubmission && (
+      {isFound && sightingSubmission && (
         <div className="mb-4">
           <div
-            onClick={() => onViewPhotoClick(target, 0)}
+            onClick={() => onViewPhotoClick(target)}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                onViewPhotoClick(target, 0);
+                onViewPhotoClick(target);
               }
             }}
             title="Click to view full photo"
@@ -96,7 +96,7 @@ export const TargetCard: React.FC<TargetCardProps> = ({
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={latestSubmission.imageUrl}
+              src={sightingSubmission.imageUrl}
               alt={`Sighting of ${target.name}`}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
               loading="lazy"
@@ -104,15 +104,15 @@ export const TargetCard: React.FC<TargetCardProps> = ({
             {/* Overlay credit info */}
             <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/90 via-black/50 to-transparent p-2 text-white flex items-end justify-between">
               <div className="text-[11px] font-mono truncate">
-                {latestSubmission.photographerName && (
+                {sightingSubmission.photographerName && (
                   <span className="flex items-center gap-1 text-amber-300 font-bold">
                     <User className="h-3 w-3" />
-                    {latestSubmission.photographerName}
+                    {sightingSubmission.photographerName}
                   </span>
                 )}
-                {latestSubmission.caption && (
+                {sightingSubmission.caption && (
                   <span className="text-slate-200 block truncate text-[10px]">
-                    &ldquo;{latestSubmission.caption}&rdquo;
+                    &ldquo;{sightingSubmission.caption}&rdquo;
                   </span>
                 )}
               </div>

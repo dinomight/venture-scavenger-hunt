@@ -100,7 +100,8 @@ export const HuntView: React.FC<HuntViewProps> = ({
   const allGalleryPhotos = useMemo(() => {
     const photos: LightboxPhoto[] = [];
     for (const target of targets) {
-      for (const sub of target.submissions) {
+      const sub = target.submissions[0];
+      if (sub) {
         photos.push({
           id: sub.id,
           targetId: sub.targetId,
@@ -116,21 +117,26 @@ export const HuntView: React.FC<HuntViewProps> = ({
     return photos;
   }, [targets]);
 
-  const handleOpenPhotoView = (target: TargetWithSubmissions, initialIndex = 0) => {
-    const targetPhotos: LightboxPhoto[] = target.submissions.map((sub) => ({
-      id: sub.id,
-      targetId: sub.targetId,
-      imageUrl: sub.imageUrl,
-      targetName: target.name,
-      categoryTag: target.categoryTag,
-      photographerName: sub.photographerName,
-      caption: sub.caption,
-      createdAt: sub.createdAt,
-    }));
+  const handleOpenPhotoView = (target: TargetWithSubmissions) => {
+    const sub = target.submissions[0];
+    if (!sub) return;
+
+    const targetPhotos: LightboxPhoto[] = [
+      {
+        id: sub.id,
+        targetId: sub.targetId,
+        imageUrl: sub.imageUrl,
+        targetName: target.name,
+        categoryTag: target.categoryTag,
+        photographerName: sub.photographerName,
+        caption: sub.caption,
+        createdAt: sub.createdAt,
+      },
+    ];
 
     setLightboxState({
       isOpen: true,
-      currentIndex: initialIndex,
+      currentIndex: 0,
       photos: targetPhotos,
     });
   };
@@ -192,7 +198,7 @@ export const HuntView: React.FC<HuntViewProps> = ({
                   key={target.id}
                   target={target}
                   onUploadClick={(t) => setActiveUploadTarget(t)}
-                  onViewPhotoClick={(t, idx) => handleOpenPhotoView(t, idx)}
+                  onViewPhotoClick={(t) => handleOpenPhotoView(t)}
                 />
               ))}
             </div>

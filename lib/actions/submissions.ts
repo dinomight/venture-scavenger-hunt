@@ -23,6 +23,16 @@ export async function createSubmissionAction(data: {
 }) {
   const db = await getDb();
 
+  // Ensure single photo per target: check if a submission already exists
+  const existingSubmissions = await db
+    .select()
+    .from(submissions)
+    .where(eq(submissions.targetId, data.targetId));
+
+  if (existingSubmissions.length > 0) {
+    throw new Error('This target already has a sighting photo logged.');
+  }
+
   const id = `sub-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
   const newSubmission = {
     id,
