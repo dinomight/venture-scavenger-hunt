@@ -4,6 +4,7 @@ import React, { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { RetroCard } from '../ui/RetroCard';
 import { RetroButton } from '../ui/RetroButton';
+import { RetroModal } from '../ui/RetroModal';
 import { BulkTargetModal } from '../targets/BulkTargetModal';
 import {
   createTarget,
@@ -68,6 +69,18 @@ export const AdminView: React.FC<AdminViewProps> = ({
   );
   const [createRequiredTargets, setCreateRequiredTargets] = useState('');
 
+  const [targetToDelete, setTargetToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [isDeletingTarget, setIsDeletingTarget] = useState(false);
+  const [noticeModal, setNoticeModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    subtitle?: string;
+    message: React.ReactNode;
+    variant?: 'danger' | 'warning' | 'info' | 'success';
+    confirmText?: string;
+    onConfirm?: () => void;
+  } | null>(null);
+
   const [isPending, startTransition] = useTransition();
 
   const handleUpdateGoal = (e: React.FormEvent) => {
@@ -100,12 +113,27 @@ export const AdminView: React.FC<AdminViewProps> = ({
     });
   };
 
-  const handleDeleteTarget = (id: string) => {
-    if (!confirm('Are you sure you want to delete this target item?')) return;
-    startTransition(async () => {
-      await deleteTarget(id, yearNumber);
+  const handleConfirmDeleteTarget = async () => {
+    if (!targetToDelete) return;
+    try {
+      setIsDeletingTarget(true);
+      await deleteTarget(targetToDelete.id, yearNumber);
+      setTargetToDelete(null);
       router.refresh();
-    });
+    } catch (err) {
+      console.error('Failed to delete target:', err);
+      setTargetToDelete(null);
+      setNoticeModal({
+        isOpen: true,
+        title: 'Delete Failed',
+        subtitle: 'Error Alert',
+        message: 'Failed to delete target item. Please try again.',
+        variant: 'danger',
+        confirmText: 'Dismiss',
+      });
+    } finally {
+      setIsDeletingTarget(false);
+    }
   };
 
   const handleCreateNewYear = (e: React.FormEvent) => {
@@ -123,11 +151,28 @@ export const AdminView: React.FC<AdminViewProps> = ({
           joinCode: createYearCode,
           requiredTargets: parsedGoal && !isNaN(parsedGoal) && parsedGoal > 0 ? parsedGoal : null,
         });
-        alert(`DragonCon ${createYearNum} session created! Redirecting...`);
-        router.push(`/${createYearNum}`);
+        setNoticeModal({
+          isOpen: true,
+          title: 'Session Initialized',
+          subtitle: `DragonCon ${createYearNum}`,
+          message: `DragonCon ${createYearNum} hunt session has been created and initialized. Join code: "${createYearCode}".`,
+          variant: 'success',
+          confirmText: `Go to ${createYearNum} Hunt`,
+          onConfirm: () => {
+            setNoticeModal(null);
+            router.push(`/${createYearNum}`);
+          },
+        });
       } catch (err: unknown) {
         const error = err as Error;
-        alert(error.message || 'Failed to create year');
+        setNoticeModal({
+          isOpen: true,
+          title: 'Session Creation Failed',
+          subtitle: 'Error Alert',
+          message: error.message || 'Failed to create year session.',
+          variant: 'danger',
+          confirmText: 'Dismiss',
+        });
       }
     });
   };
@@ -487,8 +532,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           : 'NEEDED'}
                       </span>
                       <button
-                        onClick={() => handleDeleteTarget(target.id)}
-                        className="p-1 text-slate-400 hover:text-red-600 rounded hover:bg-red-50"
+                        onClick={() => setTargetToDelete({ id: target.id, name: target.name })}
+                        className="p-1 text-slate-400 hover:text-red-600 rounded hover:bg-red-50 cursor-pointer transition-colors"
                         title="Delete target"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -501,6 +546,42 @@ export const AdminView: React.FC<AdminViewProps> = ({
           </RetroCard>
         </div>
       </div>
+
+      {/* Delete Target Modal */}
+      <RetroModal
+        isOpen={Boolean(targetToDelete)}
+        onClose={() => setTargetToDelete(null)}
+        title="Delete Target"
+        subtitle="Confirm Deletion"
+        message={
+          <>
+            Are you sure you want to delete{' '}
+            <strong className="text-slate-900 font-bold">
+              &ldquo;{targetToDelete?.name}&rdquo;
+            </strong>{' '}
+            from the DragonCon {yearNumber} checklist? This action cannot be undone.
+          </>
+        }
+        variant="danger"
+        confirmText="Delete Target"
+        cancelText="Cancel"
+        isPending={isDeletingTarget}
+        onConfirm={handleConfirmDeleteTarget}
+      />
+
+      {/* Notice / Alert Modal */}
+      {noticeModal && (
+        <RetroModal
+          isOpen={noticeModal.isOpen}
+          onClose={() => setNoticeModal(null)}
+          title={noticeModal.title}
+          subtitle={noticeModal.subtitle}
+          message={noticeModal.message}
+          variant={noticeModal.variant || 'info'}
+          confirmText={noticeModal.confirmText}
+          onConfirm={noticeModal.onConfirm}
+        />
+      )}
 
       {/* Bulk Import Modal */}
       <BulkTargetModal

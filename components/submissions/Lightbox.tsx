@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { X, ChevronLeft, ChevronRight, User, Trash2, Loader2 } from 'lucide-react';
+import { RetroModal } from '../ui/RetroModal';
 
 export interface LightboxPhoto {
   id?: string;
@@ -32,10 +33,12 @@ export const Lightbox: React.FC<LightboxProps> = ({
   onDeleteSubmission,
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
+      if (!isOpen || showDeleteConfirm || Boolean(errorMessage)) return;
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowLeft' && currentIndex > 0) onNavigate(currentIndex - 1);
       if (e.key === 'ArrowRight' && currentIndex < photos.length - 1) onNavigate(currentIndex + 1);
@@ -43,29 +46,24 @@ export const Lightbox: React.FC<LightboxProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, currentIndex, photos.length, onClose, onNavigate]);
+  }, [isOpen, currentIndex, photos.length, onClose, onNavigate, showDeleteConfirm, errorMessage]);
 
   if (!isOpen || photos.length === 0) return null;
 
   const currentPhoto = photos[currentIndex];
   if (!currentPhoto) return null;
 
-  const handleDelete = async () => {
+  const handleConfirmDelete = async () => {
     if (!currentPhoto.id || !currentPhoto.targetId || !onDeleteSubmission) return;
-    if (
-      !confirm(
-        `Are you sure you want to delete this photo sighting for "${currentPhoto.targetName}"? This will return the target to Needed status.`
-      )
-    ) {
-      return;
-    }
 
     try {
       setIsDeleting(true);
       await onDeleteSubmission(currentPhoto.id, currentPhoto.targetId);
+      setShowDeleteConfirm(false);
     } catch (err) {
       console.error('Failed to delete submission:', err);
-      alert('Failed to delete photo submission. Please try again.');
+      setShowDeleteConfirm(false);
+      setErrorMessage('Failed to delete photo submission. Please try again.');
     } finally {
       setIsDeleting(false);
     }
@@ -151,9 +149,9 @@ export const Lightbox: React.FC<LightboxProps> = ({
             {/* Delete Submission Button */}
             {onDeleteSubmission && currentPhoto.id && currentPhoto.targetId && (
               <button
-                onClick={handleDelete}
+                onClick={() => setShowDeleteConfirm(true)}
                 disabled={isDeleting}
-                className="inline-flex items-center gap-1 px-2.5 py-1 bg-red-950/80 hover:bg-red-700 text-red-200 hover:text-white border border-red-800 rounded transition-colors text-xs font-bold disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-2.5 py-1 bg-red-950/80 hover:bg-red-700 text-red-200 hover:text-white border border-red-800 rounded transition-colors text-xs font-bold disabled:opacity-50 cursor-pointer"
                 title="Delete this sighting submission"
               >
                 {isDeleting ? (
@@ -167,6 +165,40 @@ export const Lightbox: React.FC<LightboxProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <RetroModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="Delete Sighting Photo"
+        subtitle="Confirm Deletion"
+        message={
+          <>
+            Are you sure you want to delete this photo sighting for{' '}
+            <strong className="text-slate-900 font-bold">
+              &ldquo;{currentPhoto.targetName}&rdquo;
+            </strong>
+            ? This will return the target checklist item to{' '}
+            <span className="font-bold text-amber-700">NEEDED</span> status.
+          </>
+        }
+        variant="danger"
+        confirmText="Delete Photo"
+        cancelText="Cancel"
+        isPending={isDeleting}
+        onConfirm={handleConfirmDelete}
+      />
+
+      {/* Error Alert Modal */}
+      <RetroModal
+        isOpen={Boolean(errorMessage)}
+        onClose={() => setErrorMessage(null)}
+        title="Action Failed"
+        subtitle="Security Alert"
+        message={errorMessage}
+        variant="danger"
+        confirmText="Dismiss"
+      />
     </div>
   );
 };
