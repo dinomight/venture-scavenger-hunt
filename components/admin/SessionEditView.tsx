@@ -461,27 +461,25 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
                 {initialTargets.map((target, idx) => (
                   <div
                     key={target.id}
-                    className="p-3 flex items-start sm:items-center justify-between gap-2 hover:bg-slate-50 transition-colors"
+                    className="p-3 flex items-start justify-between gap-3 hover:bg-slate-50 transition-colors"
                   >
-                    <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
-                      <span className="text-[11px] font-mono font-black text-slate-400 w-5 shrink-0 text-right pt-0.5 sm:pt-0">
+                    <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                      <span className="text-[11px] font-mono font-black text-slate-400 w-5 shrink-0 text-right pt-0.5">
                         #{idx + 1}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                          <h4 className="text-xs font-black uppercase text-slate-900 break-words sm:truncate">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <h4 className="text-xs font-black uppercase text-slate-900 break-words leading-tight">
                             {target.name}
                           </h4>
                           {target.categoryTag && (
-                            <div className="flex items-center">
-                              <span className="text-[9px] font-mono font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded uppercase shrink-0">
-                                {target.categoryTag}
-                              </span>
-                            </div>
+                            <span className="text-[9px] font-mono font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded uppercase shrink-0">
+                              {target.categoryTag}
+                            </span>
                           )}
                         </div>
                         {target.description && (
-                          <p className="text-[11px] text-slate-500 italic break-words sm:truncate flex items-start gap-1 mt-1 sm:mt-0.5">
+                          <p className="text-[11px] text-slate-500 italic break-words flex items-start gap-1 mt-1 leading-normal">
                             <Quote className="h-2.5 w-2.5 text-amber-500 shrink-0 mt-0.5" />
                             <span>&ldquo;{target.description}&rdquo;</span>
                           </p>
@@ -489,7 +487,7 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0 pt-0.5 sm:pt-0">
+                    <div className="flex items-center gap-2 shrink-0 pt-0.5">
                       {target.submissions && target.submissions.length > 0 ? (
                         <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-300 whitespace-nowrap">
                           FOUND
