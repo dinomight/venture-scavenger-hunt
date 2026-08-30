@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="vBgApple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+
+    <!-- Orange Emblem Gradient -->
+    <linearGradient id="vOrangeApple" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FB923C" />
+      <stop offset="100%" stop-color="#EA580C" />
+    </linearGradient>
+
+    <!-- Gold Accent Gradient -->
+    <linearGradient id="vGoldApple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded Apple Icon Square Container -->
+  <rect width="64" height="64" rx="14" fill="url(#vBgApple)" />
+  <rect width="60" height="60" x="2" y="2" rx="12" fill="none" stroke="#EA580C" stroke-width="2.5" />
+
+  <!-- Super-Science Atomic Orbit Ring -->
+  <ellipse cx="32" cy="32" rx="26" ry="9" transform="rotate(-30 32 32)" fill="none" stroke="#F59E0B" stroke-width="1.8" stroke-opacity="0.85" />
+  <!-- Orbit Atom Particle -->
+  <circle cx="12" cy="20.5" r="2.2" fill="#FDE047" stroke="#0F172A" stroke-width="0.8" />
+
+  <!-- Stylized Venture 'V' Shadow -->
+  <path
+    d="M17 14 L24 14 L32 36 L40 14 L47 14 L35.5 45 L28.5 45 Z"
+    fill="#000000"
+    transform="translate(1.5, 1.5)"
+    opacity="0.8"
+  />
+
+  <!-- Team Venture Bold Stylized 'V' -->
+  <!-- Left Wing -->
+  <path
+    d="M16 14 L23.5 14 L32 37 L27 45 L16 14 Z"
+    fill="url(#vOrangeApple)"
+    stroke="#0F172A"
+    stroke-width="1.2"
+    stroke-linejoin="round"
+  />
+  
+  <!-- Right Wing & Central Cream Inset -->
+  <path
+    d="M48 14 L40.5 14 L32 37 L37 45 L48 14 Z"
+    fill="url(#vGoldApple)"
+    stroke="#0F172A"
+    stroke-width="1.2"
+    stroke-linejoin="round"
+  />
+
+  <!-- Main Crisp Cream 'V' Core -->
+  <path
+    d="M19 16 L24 16 L32 36 L40 16 L45 16 L34.5 43 L29.5 43 Z"
+    fill="#FFFBEB"
+    stroke="#0F172A"
+    stroke-width="1"
+    stroke-linejoin="round"
+  />
+
+  <!-- Central Speed Chevron / Divider -->
+  <polygon
+    points="32,20 34.5,26 32,38 29.5,26"
+    fill="#EA580C"
+  />
+  <circle cx="32" cy="18" r="1.8" fill="#F59E0B" />
+</svg>

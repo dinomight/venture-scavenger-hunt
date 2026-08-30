@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #faf7f2;
+  --foreground: #0f172a;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@theme {
+  --color-venture-orange: #ea580c;
+  --color-venture-orange-light: #fb923c;
+  --color-venture-orange-hover: #c2410c;
+  --color-venture-cream: #faf7f2;
+  --color-venture-cream-dark: #f2ece1;
+  --color-venture-navy: #0f172a;
+  --color-venture-slate: #1e293b;
+  --color-monarch-gold: #f59e0b;
+  --color-monarch-gold-light: #fef08a;
+  --color-guild-purple: #6b21a8;
+  --color-guild-purple-light: #a855f7;
+  --color-henchman-red: #dc2626;
+  --color-henchman-yellow: #facc15;
+  --color-con-carpet-blue: #1e3a5f;
+  --color-con-carpet-red: #9e2a2b;
+  --color-con-badge-gold: #e0a96d;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --shadow-retro: 3px 3px 0px 0px #0f172a;
+  --shadow-retro-sm: 2px 2px 0px 0px #0f172a;
+  --shadow-retro-lg: 5px 5px 0px 0px #0f172a;
+  --shadow-retro-orange: 3px 3px 0px 0px #ea580c;
+  --shadow-retro-gold: 3px 3px 0px 0px #f59e0b;
+  --shadow-retro-purple: 3px 3px 0px 0px #6b21a8;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #faf7f2;
+  color: #0f172a;
+  min-height: 100vh;
+}
+
+/* Custom halftone / vintage comic dot pattern */
+.bg-halftone {
+  background-image: radial-gradient(#0f172a 10%, transparent 11%);
+  background-size: 10px 10px;
+}
+
+/* Subtle con badge lanyard punch hole effect */
+.badge-punch-hole {
+  position: relative;
+}
+.badge-punch-hole::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 6px;
+  background: #0f172a;
+  border-radius: 9999px;
+  opacity: 0.85;
 }
