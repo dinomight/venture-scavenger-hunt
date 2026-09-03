@@ -126,6 +126,32 @@ export async function bulkImportTargets(
   return { count: newTargets.length };
 }
 
+export async function updateTarget(
+  targetId: string,
+  yearNumber: number,
+  data: {
+    name: string;
+    description?: string;
+    categoryTag?: string;
+  }
+) {
+  const db = await getDb();
+  await db
+    .update(targets)
+    .set({
+      name: data.name.trim(),
+      description: data.description?.trim() || null,
+      categoryTag: data.categoryTag?.trim() || null,
+    })
+    .where(eq(targets.id, targetId));
+
+  safeRevalidate(`/${yearNumber}`);
+  safeRevalidate(`/${yearNumber}/admin`);
+  safeRevalidate('/admin');
+  safeRevalidate(`/admin/${yearNumber}`);
+  return { success: true };
+}
+
 export async function deleteTarget(targetId: string, yearNumber: number) {
   const db = await getDb();
   await db.delete(targets).where(eq(targets.id, targetId));

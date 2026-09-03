@@ -109,8 +109,8 @@ export const SessionsListView: React.FC<SessionsListViewProps> = ({
   const handleLockAdmin = () => {
     startTransition(async () => {
       await lockAdminAction();
-      router.push('/');
-      router.refresh();
+      document.cookie = 'venture_admin_session=; path=/; max-age=0; SameSite=Lax';
+      window.location.href = '/admin';
     });
   };
 

@@ -7,8 +7,10 @@ import { RetroCard } from '../ui/RetroCard';
 import { RetroButton } from '../ui/RetroButton';
 import { RetroModal } from '../ui/RetroModal';
 import { BulkTargetModal } from '../targets/BulkTargetModal';
+import { TargetFormModal } from '../targets/TargetFormModal';
 import {
   createTarget,
+  updateTarget,
   deleteTarget,
   type TargetWithSubmissions,
 } from '@/lib/actions/targets';
@@ -32,6 +34,9 @@ import {
   Edit3,
   ArrowLeft,
   Quote,
+  Search,
+  Filter,
+  X,
 } from 'lucide-react';
 
 interface SessionEditViewProps {
@@ -48,7 +53,13 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
 }) => {
   const router = useRouter();
   const [isBulkOpen, setIsBulkOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [targetToEdit, setTargetToEdit] = useState<TargetWithSubmissions | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  // Search & Filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
 
   // Year Settings Form State
   const [yearTitle, setYearTitle] = useState(yearData.title);
@@ -59,11 +70,6 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
       : ''
   );
   const [savedSettingsSuccess, setSavedSettingsSuccess] = useState(false);
-
-  // Single target form
-  const [newName, setNewName] = useState('');
-  const [newCategory, setNewCategory] = useState('');
-  const [newDesc, setNewDesc] = useState('');
 
   // Deletion and modals
   const [targetToDelete, setTargetToDelete] = useState<{ id: string; name: string } | null>(null);
@@ -96,21 +102,33 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
     });
   };
 
-  const handleAddSingleTarget = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newName.trim()) return;
-
-    startTransition(async () => {
-      await createTarget({
-        yearNumber,
-        name: newName,
-        categoryTag: newCategory || undefined,
-        description: newDesc || undefined,
-      });
-      setNewName('');
-      setNewDesc('');
-      router.refresh();
+  const handleAddTarget = async (data: {
+    name: string;
+    categoryTag?: string;
+    description?: string;
+  }) => {
+    await createTarget({
+      yearNumber,
+      name: data.name,
+      categoryTag: data.categoryTag,
+      description: data.description,
     });
+    router.refresh();
+  };
+
+  const handleEditTarget = async (data: {
+    name: string;
+    categoryTag?: string;
+    description?: string;
+  }) => {
+    if (!targetToEdit) return;
+    await updateTarget(targetToEdit.id, yearNumber, {
+      name: data.name,
+      categoryTag: data.categoryTag,
+      description: data.description,
+    });
+    setTargetToEdit(null);
+    router.refresh();
   };
 
   const handleConfirmDeleteTarget = async () => {
@@ -139,8 +157,8 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
   const handleLockAdmin = () => {
     startTransition(async () => {
       await lockAdminAction();
-      router.push(`/${yearNumber}`);
-      router.refresh();
+      document.cookie = 'venture_admin_session=; path=/; max-age=0; SameSite=Lax';
+      window.location.href = '/admin';
     });
   };
 
@@ -163,6 +181,24 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
       setTimeout(() => setCopiedLink(false), 2000);
     }
   };
+
+  const categories = Array.from(
+    new Set(initialTargets.map((t) => t.categoryTag).filter((c): c is string => Boolean(c)))
+  ).sort();
+
+  const filteredTargets = initialTargets.filter((t) => {
+    const query = searchQuery.trim().toLowerCase();
+    const matchesSearch =
+      !query ||
+      t.name.toLowerCase().includes(query) ||
+      (t.description && t.description.toLowerCase().includes(query)) ||
+      (t.categoryTag && t.categoryTag.toLowerCase().includes(query));
+
+    const matchesCategory =
+      selectedCategory === 'ALL' || t.categoryTag === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="space-y-6 pb-12">
@@ -347,172 +383,219 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
       </RetroCard>
 
       {/* Target List Management */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Add Single Target */}
-        <div className="lg:col-span-1 space-y-6">
-          <RetroCard className="p-5">
-            <div className="flex items-center justify-between border-b-2 border-slate-900 pb-2.5 mb-4">
-              <h3 className="text-sm font-black uppercase text-slate-900 flex items-center gap-1.5">
-                <Plus className="h-4 w-4 text-orange-600" />
-                Add Single Target
-              </h3>
-            </div>
+      <RetroCard className="p-5 sm:p-6 bg-white border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-slate-900 pb-4 mb-4">
+          <div>
+            <span className="text-[10px] font-mono font-black uppercase tracking-widest text-orange-600">
+              TARGET DOSSIER MANAGEMENT
+            </span>
+            <h3 className="text-lg sm:text-xl font-black uppercase text-slate-900 flex items-center gap-2">
+              <Layers className="h-5 w-5 text-orange-600" />
+              Current Target Checklist ({initialTargets.length})
+            </h3>
+          </div>
 
-            <form onSubmit={handleAddSingleTarget} className="space-y-3">
-              <div>
-                <label className="block text-[11px] font-mono font-bold uppercase text-slate-900 mb-1">
-                  Cosplayer / Character Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Brock Samson"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  className="w-full text-xs bg-venture-cream border-2 border-slate-900 rounded p-2 focus:outline-none focus:border-orange-600 font-medium"
-                />
-              </div>
+          <div className="flex items-center gap-2">
+            <RetroButton
+              onClick={() => setIsAddModalOpen(true)}
+              variant="orange"
+              size="sm"
+              className="text-xs font-black shadow-retro-sm"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add Target
+            </RetroButton>
 
-              <div>
-                <label className="block text-[11px] font-mono font-bold uppercase text-slate-900 mb-1">
-                  Category Tag (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Team Venture"
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  className="w-full text-xs bg-venture-cream border-2 border-slate-900 rounded p-2 focus:outline-none focus:border-orange-600 font-medium"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-mono font-bold uppercase text-slate-900 mb-1">
-                  Character Quote (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder='e.g. "Go ahead. Take it from me."'
-                  value={newDesc}
-                  onChange={(e) => setNewDesc(e.target.value)}
-                  className="w-full text-xs bg-venture-cream border-2 border-slate-900 rounded p-2 focus:outline-none focus:border-orange-600 font-medium"
-                />
-              </div>
-
-              <RetroButton
-                type="submit"
-                disabled={isPending || !newName.trim()}
-                variant="orange"
-                size="sm"
-                fullWidth
-                className="mt-2 text-xs"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add Target
-              </RetroButton>
-            </form>
-
-            <div className="mt-4 pt-4 border-t border-slate-200">
-              <RetroButton
-                onClick={() => setIsBulkOpen(true)}
-                variant="gold"
-                size="sm"
-                fullWidth
-                className="text-xs"
-              >
-                <Upload className="h-4 w-4 mr-1.5" />
-                Bulk Import Paste / CSV
-              </RetroButton>
-            </div>
-          </RetroCard>
+            <RetroButton
+              onClick={() => setIsBulkOpen(true)}
+              variant="navy"
+              size="sm"
+              className="text-xs font-bold shadow-retro-sm"
+            >
+              <Upload className="h-3.5 w-3.5 mr-1" />
+              Bulk Ingest
+            </RetroButton>
+          </div>
         </div>
 
-        {/* Right Column: Existing Targets */}
-        <div className="lg:col-span-2">
-          <RetroCard className="p-5">
-            <div className="flex items-center justify-between border-b-2 border-slate-900 pb-2.5 mb-4">
-              <h3 className="text-sm font-black uppercase text-slate-900 flex items-center gap-1.5">
-                <Layers className="h-4 w-4 text-orange-600" />
-                Current Target Checklist ({initialTargets.length})
-              </h3>
+        {/* Filter / Search Bar */}
+        {initialTargets.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center gap-2.5 mb-4 bg-venture-cream p-2.5 rounded-lg border-2 border-slate-900 shadow-retro-sm">
+            <div className="relative flex-1 w-full">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400">
+                <Search className="h-3.5 w-3.5" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search targets by name, quote, or category tag..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-8 pr-8 py-1.5 text-xs bg-white border-2 border-slate-900 rounded font-medium focus:outline-none focus:border-orange-600 placeholder:text-slate-400"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-slate-700 cursor-pointer"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+            {categories.length > 0 && (
+              <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                <Filter className="h-3.5 w-3.5 text-slate-600 shrink-0 hidden sm:block" />
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full sm:w-auto text-xs font-mono font-bold bg-white text-slate-900 border-2 border-slate-900 rounded px-2.5 py-1.5 focus:outline-none focus:border-orange-600 cursor-pointer"
+                >
+                  <option value="ALL">All Categories ({initialTargets.length})</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat} (
+                      {initialTargets.filter((t) => t.categoryTag === cat).length})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        )}
+
+        {initialTargets.length === 0 ? (
+          <div className="text-center py-12 bg-venture-cream/40 rounded-lg border-2 border-dashed border-slate-300 p-6 space-y-4">
+            <Layers className="h-10 w-10 text-slate-400 mx-auto" />
+            <div>
+              <p className="text-sm font-bold text-slate-700 font-mono">
+                No targets added yet for DragonCon {yearNumber}.
+              </p>
+              <p className="text-xs text-slate-500 mt-1">
+                Add individual targets or bulk ingest a list using OCR photo scanning or text paste.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <RetroButton
+                onClick={() => setIsAddModalOpen(true)}
+                variant="orange"
+                size="sm"
+                className="text-xs font-black"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add First Target
+              </RetroButton>
               <RetroButton
                 onClick={() => setIsBulkOpen(true)}
                 variant="navy"
                 size="sm"
-                className="text-xs"
+                className="text-xs font-bold"
               >
-                <Upload className="h-3.5 w-3.5 mr-1" />
-                Bulk Ingest
+                <Upload className="h-4 w-4 mr-1" />
+                Bulk Ingest Targets
               </RetroButton>
             </div>
-
-            {initialTargets.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded border-2 border-dashed border-slate-300">
-                <Layers className="h-8 w-8 text-slate-400 mx-auto mb-2" />
-                <p className="text-xs text-slate-500 font-mono">
-                  No targets added yet for DragonCon {yearNumber}.
-                </p>
-                <p className="text-[11px] text-slate-400 mt-1">
-                  Add individual targets or paste a bulk list on the left.
-                </p>
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-200 max-h-150 overflow-y-auto pr-1">
-                {initialTargets.map((target, idx) => (
-                  <div
-                    key={target.id}
-                    className="p-3 flex items-start justify-between gap-3 hover:bg-slate-50 transition-colors"
-                  >
-                    <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                      <span className="text-[11px] font-mono font-black text-slate-400 w-5 shrink-0 text-right pt-0.5">
-                        #{idx + 1}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                          <h4 className="text-xs font-black uppercase text-slate-900 break-words leading-tight">
-                            {target.name}
-                          </h4>
-                          {target.categoryTag && (
-                            <span className="text-[9px] font-mono font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded uppercase shrink-0">
-                              {target.categoryTag}
-                            </span>
-                          )}
-                        </div>
-                        {target.description && (
-                          <p className="text-[11px] text-slate-500 italic break-words flex items-start gap-1 mt-1 leading-normal">
-                            <Quote className="h-2.5 w-2.5 text-amber-500 shrink-0 mt-0.5" />
-                            <span>&ldquo;{target.description}&rdquo;</span>
-                          </p>
+          </div>
+        ) : filteredTargets.length === 0 ? (
+          <div className="text-center py-10 bg-venture-cream/40 rounded border-2 border-dashed border-slate-300 p-4">
+            <p className="text-xs font-mono font-bold text-slate-600">
+              No targets match your search or filter criteria.
+            </p>
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedCategory('ALL');
+              }}
+              className="mt-2 text-xs font-mono font-bold text-orange-600 underline hover:text-orange-800 cursor-pointer"
+            >
+              Reset Search &amp; Filters
+            </button>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-200 max-h-160 overflow-y-auto pr-1">
+            {filteredTargets.map((target, idx) => {
+              const globalIdx = initialTargets.findIndex((t) => t.id === target.id);
+              return (
+                <div
+                  key={target.id}
+                  className="p-3 sm:p-3.5 flex items-start justify-between gap-3 hover:bg-slate-50 rounded transition-colors group"
+                >
+                  <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                    <span className="text-[11px] font-mono font-black text-slate-400 w-6 shrink-0 text-right pt-0.5">
+                      #{globalIdx >= 0 ? globalIdx + 1 : idx + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <h4 className="text-xs sm:text-sm font-black uppercase text-slate-900 break-words leading-tight">
+                          {target.name}
+                        </h4>
+                        {target.categoryTag && (
+                          <span className="text-[9px] font-mono font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded uppercase shrink-0 border border-slate-300">
+                            {target.categoryTag}
+                          </span>
                         )}
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0 pt-0.5">
-                      {target.submissions && target.submissions.length > 0 ? (
-                        <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-300 whitespace-nowrap">
-                          FOUND
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-mono font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded border border-amber-300 whitespace-nowrap">
-                          NEEDED
-                        </span>
+                      {target.description && (
+                        <p className="text-[11px] text-slate-600 italic break-words flex items-start gap-1 mt-1 leading-normal">
+                          <Quote className="h-3 w-3 text-amber-500 shrink-0 mt-0.5" />
+                          <span>&ldquo;{target.description}&rdquo;</span>
+                        </p>
                       )}
-
-                      <button
-                        onClick={() => setTargetToDelete({ id: target.id, name: target.name })}
-                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded cursor-pointer transition-colors"
-                        title="Delete target"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </RetroCard>
-        </div>
-      </div>
+
+                  <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pt-0.5">
+                    {target.submissions && target.submissions.length > 0 ? (
+                      <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-300 whitespace-nowrap">
+                        FOUND ({target.submissions.length})
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded border border-amber-300 whitespace-nowrap">
+                        NEEDED
+                      </span>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => setTargetToEdit(target)}
+                      className="p-1.5 text-slate-500 hover:text-amber-800 hover:bg-amber-100 rounded border border-transparent hover:border-amber-300 cursor-pointer transition-colors"
+                      title="Edit target name, category, or quote"
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setTargetToDelete({ id: target.id, name: target.name })}
+                      className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded border border-transparent hover:border-red-200 cursor-pointer transition-colors"
+                      title="Delete target"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </RetroCard>
+
+      {/* Add Single Target Modal */}
+      <TargetFormModal
+        isOpen={isAddModalOpen}
+        mode="add"
+        onSubmit={handleAddTarget}
+        onClose={() => setIsAddModalOpen(false)}
+      />
+
+      {/* Edit Target Modal */}
+      <TargetFormModal
+        isOpen={Boolean(targetToEdit)}
+        mode="edit"
+        initialData={targetToEdit}
+        onSubmit={handleEditTarget}
+        onClose={() => setTargetToEdit(null)}
+      />
 
       {/* Delete Target Modal */}
       {targetToDelete && (

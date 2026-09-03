@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { RetroButton } from '../ui/RetroButton';
 import { CarpetPattern } from '../ui/CarpetPattern';
 import { VentureIcon } from '../ui/VentureIcon';
@@ -14,21 +13,32 @@ interface AdminGateProps {
 }
 
 export const AdminGate: React.FC<AdminGateProps> = ({ activeYear = 2026 }) => {
-  const router = useRouter();
   const [pin, setPin] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!pin.trim()) {
+      setError('ENTER MASTER CLEARANCE PASSPHRASE');
+      return;
+    }
     setError(null);
 
     startTransition(async () => {
-      const result = await unlockAdminAction(pin);
-      if (result.success) {
-        router.refresh();
-      } else {
-        setError(result.error || 'ACCESS DENIED: INVALID CLEARANCE CODE');
+      try {
+        const result = await unlockAdminAction(pin.trim());
+        if (result.success) {
+          // Set client-side cookie directly as fallback so subsequent requests immediately recognize the session
+          document.cookie = 'venture_admin_session=unlocked; path=/; max-age=2592000; SameSite=Lax';
+          // Force a full page reload to enter the admin console immediately
+          window.location.reload();
+        } else {
+          setError(result.error || 'ACCESS DENIED: INVALID CLEARANCE CODE');
+        }
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'FAILED TO AUTHENTICATE';
+        setError(message);
       }
     });
   };

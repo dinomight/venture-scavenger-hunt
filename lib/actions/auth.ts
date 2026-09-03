@@ -42,6 +42,7 @@ export async function unlockAdminAction(pin: string) {
 
   await unlockAdminSession();
   try {
+    revalidatePath('/', 'layout');
     revalidatePath('/admin');
   } catch {
     // Ignore outside request context
@@ -52,6 +53,7 @@ export async function unlockAdminAction(pin: string) {
 export async function lockAdminAction() {
   await lockAdminSession();
   try {
+    revalidatePath('/', 'layout');
     revalidatePath('/admin');
   } catch {
     // Ignore outside request context

@@ -1,7 +1,7 @@
 import { client } from '../lib/db';
 import { ensureSchema } from '../lib/db/init';
 import { getAllYears, getYearByNumber, createYearSession, updateYearSettings } from '../lib/actions/years';
-import { getTargetsForYear, createTarget, bulkImportTargets, deleteTarget } from '../lib/actions/targets';
+import { getTargetsForYear, createTarget, updateTarget, bulkImportTargets, deleteTarget } from '../lib/actions/targets';
 import { createSubmissionAction, deleteSubmissionAction } from '../lib/actions/submissions';
 import { getRankMilestone } from '../lib/utils/rank-titles';
 import { validateAdminPin } from '../lib/session';
@@ -54,8 +54,8 @@ async function runTests() {
   if (initialTargets.length === 0) throw new Error('No seeded targets found for 2026');
   console.log(`✓ Retrieved ${initialTargets.length} initial targets for DragonCon 2026.`);
 
-  // 4. Test Single Target Creation
-  console.log('4. Testing single target creation...');
+  // 4. Test Single Target Creation & Update
+  console.log('4. Testing single target creation & update...');
   const customTarget = await createTarget({
     yearNumber: 2026,
     name: 'Henchman 24 Ghost',
@@ -64,6 +64,24 @@ async function runTests() {
   });
   if (!customTarget.id) throw new Error('Target creation failed');
   console.log(`✓ Created single target: "${customTarget.name}" (${customTarget.id})`);
+
+  // 4b. Test Updating Target
+  await updateTarget(customTarget.id, 2026, {
+    name: 'Henchman 24 (Ghost of 24)',
+    categoryTag: 'Henchmen Ghosts',
+    description: "Look out, 21! It's a trap!",
+  });
+  const targetsAfterUpdate = await getTargetsForYear(2026);
+  const updatedTargetRecord = targetsAfterUpdate.find((t) => t.id === customTarget.id);
+  if (
+    !updatedTargetRecord ||
+    updatedTargetRecord.name !== 'Henchman 24 (Ghost of 24)' ||
+    updatedTargetRecord.categoryTag !== 'Henchmen Ghosts' ||
+    updatedTargetRecord.description !== "Look out, 21! It's a trap!"
+  ) {
+    throw new Error('Target update failed: record mismatch');
+  }
+  console.log(`✓ Updated target successfully: "${updatedTargetRecord.name}" [${updatedTargetRecord.categoryTag}]`);
 
   // 5. Test Bulk Import
   console.log('5. Testing bulk import...');
