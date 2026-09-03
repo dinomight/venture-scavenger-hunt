@@ -5,6 +5,7 @@ import { targets, submissions, type Target, type Submission } from '../db/schema
 import { eq, asc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { getYearByNumber } from './years';
+import { deleteBlobsIfNotReferenced } from '../utils/blob';
 
 export interface TargetWithSubmissions extends Target {
   submissions: Submission[];
@@ -154,7 +155,27 @@ export async function updateTarget(
 
 export async function deleteTarget(targetId: string, yearNumber: number) {
   const db = await getDb();
+
+  // 1. Fetch any submissions associated with this target
+  const targetSubmissions = await db
+    .select({ id: submissions.id, imageUrl: submissions.imageUrl })
+    .from(submissions)
+    .where(eq(submissions.targetId, targetId));
+
+  if (targetSubmissions.length > 0) {
+    const candidateUrls = targetSubmissions.map((s) => s.imageUrl);
+    const submissionIds = targetSubmissions.map((s) => s.id);
+
+    // 2. Delete blobs from storage if they are not referenced by other targets/submissions
+    await deleteBlobsIfNotReferenced(candidateUrls, submissionIds);
+
+    // 3. Delete submissions for this target from DB
+    await db.delete(submissions).where(eq(submissions.targetId, targetId));
+  }
+
+  // 4. Delete the target itself
   await db.delete(targets).where(eq(targets.id, targetId));
+
   safeRevalidate(`/${yearNumber}`);
   safeRevalidate(`/${yearNumber}/admin`);
   safeRevalidate('/admin');

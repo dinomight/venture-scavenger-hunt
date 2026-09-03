@@ -14,7 +14,7 @@ import {
   deleteTarget,
   type TargetWithSubmissions,
 } from '@/lib/actions/targets';
-import { updateYearSettings } from '@/lib/actions/years';
+import { updateYearSettings, deleteYearSession } from '@/lib/actions/years';
 import { lockAdminAction } from '@/lib/actions/auth';
 import { copyToClipboard } from '@/lib/utils/clipboard';
 import type { Year } from '@/lib/db/schema';
@@ -74,6 +74,8 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
   // Deletion and modals
   const [targetToDelete, setTargetToDelete] = useState<{ id: string; name: string } | null>(null);
   const [isDeletingTarget, setIsDeletingTarget] = useState(false);
+  const [isDeleteSessionModalOpen, setIsDeleteSessionModalOpen] = useState(false);
+  const [isDeletingSession, setIsDeletingSession] = useState(false);
   const [noticeModal, setNoticeModal] = useState<{
     isOpen: boolean;
     title: string;
@@ -85,6 +87,29 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
   } | null>(null);
 
   const [isPending, startTransition] = useTransition();
+
+  const handleConfirmDeleteSession = async () => {
+    try {
+      setIsDeletingSession(true);
+      await deleteYearSession(yearNumber);
+      setIsDeleteSessionModalOpen(false);
+      router.push('/admin');
+      router.refresh();
+    } catch (err) {
+      console.error('Failed to delete year session:', err);
+      setIsDeleteSessionModalOpen(false);
+      setNoticeModal({
+        isOpen: true,
+        title: 'Delete Failed',
+        subtitle: 'Error Alert',
+        message: 'Failed to delete hunt session. Please try again.',
+        variant: 'danger',
+        confirmText: 'Dismiss',
+      });
+    } finally {
+      setIsDeletingSession(false);
+    }
+  };
 
   const handleUpdateYearSettings = (e: React.FormEvent) => {
     e.preventDefault();
@@ -243,12 +268,23 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
           </Link>
 
           <button
+            onClick={() => setIsDeleteSessionModalOpen(true)}
+            disabled={isPending}
+            className="inline-flex items-center gap-1 text-xs font-mono font-bold uppercase text-red-300 hover:text-red-100 bg-red-950 hover:bg-red-900 px-2.5 py-1.5 rounded border border-red-700 cursor-pointer transition-colors"
+            title="Delete Hunt Session"
+            aria-label="Delete Hunt Session"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Delete Hunt</span>
+          </button>
+
+          <button
             onClick={handleLockAdmin}
             disabled={isPending}
-            className="inline-flex items-center gap-1 text-xs font-mono font-bold uppercase text-red-200 bg-red-950/80 hover:bg-red-900 px-2.5 py-1.5 rounded border border-red-700 cursor-pointer transition-colors"
+            className="inline-flex items-center gap-1 text-xs font-mono font-bold uppercase text-slate-300 bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded border border-slate-700 cursor-pointer transition-colors"
             title="Lock Admin Console"
           >
-            <Lock className="h-3.5 w-3.5 text-red-400" />
+            <Lock className="h-3.5 w-3.5 text-amber-400" />
             <span className="hidden sm:inline">Lock</span>
           </button>
         </div>
@@ -363,21 +399,34 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
               </span>
             </p>
 
-            <RetroButton
-              type="submit"
-              disabled={isPending}
-              variant="orange"
-              size="sm"
-              className="text-xs shrink-0"
-            >
-              {savedSettingsSuccess ? (
-                <span className="flex items-center gap-1 text-white">
-                  <Check className="h-3.5 w-3.5" /> SETTINGS SAVED!
-                </span>
-              ) : (
-                'Save Session Settings'
-              )}
-            </RetroButton>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsDeleteSessionModalOpen(true)}
+                disabled={isPending}
+                className="inline-flex items-center gap-1 text-xs font-mono font-bold uppercase text-red-700 hover:text-red-900 hover:bg-red-50 px-2.5 py-1.5 rounded border border-red-300 hover:border-red-400 transition-colors cursor-pointer"
+                title="Delete this hunt session"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete Hunt
+              </button>
+
+              <RetroButton
+                type="submit"
+                disabled={isPending}
+                variant="orange"
+                size="sm"
+                className="text-xs shrink-0"
+              >
+                {savedSettingsSuccess ? (
+                  <span className="flex items-center gap-1 text-white">
+                    <Check className="h-3.5 w-3.5" /> SETTINGS SAVED!
+                  </span>
+                ) : (
+                  'Save Session Settings'
+                )}
+              </RetroButton>
+            </div>
           </div>
         </form>
       </RetroCard>
@@ -620,6 +669,34 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
             </p>
             <p className="text-xs text-red-600 font-mono">
               Any associated sighting photo for this target will also be removed.
+            </p>
+          </div>
+        </RetroModal>
+      )}
+
+      {/* Delete Hunt Session Modal */}
+      {isDeleteSessionModalOpen && (
+        <RetroModal
+          isOpen={true}
+          title={`Delete ${yearNumber} Hunt?`}
+          subtitle="Warning: Irreversible Action"
+          variant="danger"
+          confirmText={isDeletingSession ? 'Deleting...' : 'Delete Hunt'}
+          cancelText="Cancel"
+          isPending={isDeletingSession}
+          onConfirm={handleConfirmDeleteSession}
+          onClose={() => setIsDeleteSessionModalOpen(false)}
+        >
+          <div className="space-y-2">
+            <p className="text-sm text-slate-800 font-medium">
+              Are you sure you want to permanently delete the{' '}
+              <span className="font-bold text-slate-950 underline decoration-red-500">
+                {yearData.title}
+              </span>{' '}
+              hunt session?
+            </p>
+            <p className="text-xs text-red-600 font-mono">
+              This will permanently remove all {initialTargets.length} target cosplayers, all participant photo sightings, and all session settings for {yearNumber}.
             </p>
           </div>
         </RetroModal>

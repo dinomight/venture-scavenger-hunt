@@ -1,6 +1,6 @@
 import { client } from '../lib/db';
 import { ensureSchema } from '../lib/db/init';
-import { getAllYears, getYearByNumber, createYearSession, updateYearSettings } from '../lib/actions/years';
+import { getAllYears, getYearByNumber, createYearSession, updateYearSettings, deleteYearSession } from '../lib/actions/years';
 import { getTargetsForYear, createTarget, updateTarget, bulkImportTargets, deleteTarget } from '../lib/actions/targets';
 import { createSubmissionAction, deleteSubmissionAction } from '../lib/actions/submissions';
 import { getRankMilestone } from '../lib/utils/rank-titles';
@@ -167,6 +167,51 @@ async function runTests() {
   if (validateAdminPin('INVALID_PIN')) throw new Error('Invalid admin PIN unexpectedly passed');
   if (validateAdminPin('')) throw new Error('Empty admin PIN unexpectedly passed');
   console.log('✓ Master Admin Clearance PIN validation succeeded.');
+
+  // 10. Test Deleting a Hunt Session with Targets and Submissions
+  console.log('10. Testing Deleting a Hunt Session (2099) with active sightings and blob cleanup...');
+  const t1 = await createTarget({
+    yearNumber: testYearNum,
+    name: 'Temporary 2099 Target 1',
+    categoryTag: 'Future Venture',
+  });
+  const t2 = await createTarget({
+    yearNumber: testYearNum,
+    name: 'Temporary 2099 Target 2',
+    categoryTag: 'Future Venture',
+  });
+
+  await createSubmissionAction({
+    targetId: t1.id,
+    yearNumber: testYearNum,
+    imageUrl: 'https://blob.vercel-storage.com/sample-image-1.jpg',
+    photographerName: 'Hank',
+  });
+  await createSubmissionAction({
+    targetId: t2.id,
+    yearNumber: testYearNum,
+    imageUrl: 'https://blob.vercel-storage.com/sample-image-2.jpg',
+    photographerName: 'Dean',
+  });
+
+  const targetsBeforeDelete = await getTargetsForYear(testYearNum);
+  if (targetsBeforeDelete.length !== 2) throw new Error('Failed to create targets for year 2099');
+
+  const deleteResult = await deleteYearSession(testYearNum);
+  if (!deleteResult.success || deleteResult.deletedYear !== testYearNum) {
+    throw new Error('deleteYearSession returned unexpected result');
+  }
+
+  const deletedSession = await getYearByNumber(testYearNum);
+  if (deletedSession !== null) {
+    throw new Error('Year session 2099 was not deleted');
+  }
+
+  const targetsAfterDelete = await getTargetsForYear(testYearNum);
+  if (targetsAfterDelete.length !== 0) {
+    throw new Error('Targets for deleted year 2099 were not cleaned up');
+  }
+  console.log('✓ Hunt session 2099, associated targets, and photo sightings were cleanly deleted.');
 
   console.log('\n========================================');
   console.log('ALL VERIFICATION TESTS PASSED SUCCESSFULLY!');

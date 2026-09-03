@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { RetroCard } from '../ui/RetroCard';
 import { RetroButton } from '../ui/RetroButton';
 import { RetroModal } from '../ui/RetroModal';
-import { createYearSession } from '@/lib/actions/years';
+import { createYearSession, deleteYearSession } from '@/lib/actions/years';
 import { lockAdminAction } from '@/lib/actions/auth';
 import { copyToClipboard } from '@/lib/utils/clipboard';
 import type { Year } from '@/lib/db/schema';
@@ -21,6 +21,7 @@ import {
   Layers,
   ChevronRight,
   Settings,
+  Trash2,
 } from 'lucide-react';
 
 export interface YearWithCount extends Year {
@@ -47,6 +48,8 @@ export const SessionsListView: React.FC<SessionsListViewProps> = ({
   );
   const [createRequiredTargets, setCreateRequiredTargets] = useState('15');
   const [copiedCodeYear, setCopiedCodeYear] = useState<number | null>(null);
+  const [yearToDelete, setYearToDelete] = useState<number | null>(null);
+  const [isDeletingYear, setIsDeletingYear] = useState(false);
 
   const [noticeModal, setNoticeModal] = useState<{
     isOpen: boolean;
@@ -59,6 +62,29 @@ export const SessionsListView: React.FC<SessionsListViewProps> = ({
   } | null>(null);
 
   const [isPending, startTransition] = useTransition();
+
+  const handleConfirmDeleteYear = async () => {
+    if (!yearToDelete) return;
+    try {
+      setIsDeletingYear(true);
+      await deleteYearSession(yearToDelete);
+      setYearToDelete(null);
+      router.refresh();
+    } catch (err) {
+      console.error('Failed to delete year session:', err);
+      setYearToDelete(null);
+      setNoticeModal({
+        isOpen: true,
+        title: 'Delete Failed',
+        subtitle: 'Error Alert',
+        message: 'Failed to delete hunt session. Please try again.',
+        variant: 'danger',
+        confirmText: 'Dismiss',
+      });
+    } finally {
+      setIsDeletingYear(false);
+    }
+  };
 
   const handleCreateNewYear = (e: React.FormEvent) => {
     e.preventDefault();
@@ -359,15 +385,54 @@ export const SessionsListView: React.FC<SessionsListViewProps> = ({
                     href={`/${y.year}`}
                     className="p-2 text-slate-700 hover:text-slate-950 bg-amber-300 hover:bg-amber-200 rounded border-2 border-slate-900 shadow-retro-sm cursor-pointer active:translate-x-px active:translate-y-px"
                     title={`Open live ${y.year} hunt`}
+                    aria-label={`Open live ${y.year} hunt`}
                   >
                     <ExternalLink className="h-4 w-4" />
                   </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => setYearToDelete(y.year)}
+                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded border-2 border-transparent hover:border-red-200 transition-colors cursor-pointer active:translate-x-px active:translate-y-px"
+                    title={`Delete DragonCon ${y.year} hunt session`}
+                    aria-label={`Delete DragonCon ${y.year} hunt session`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </RetroCard>
+
+      {/* Delete Hunt Session Modal */}
+      {yearToDelete !== null && (
+        <RetroModal
+          isOpen={true}
+          title={`Delete ${yearToDelete} Hunt?`}
+          subtitle="Warning: Irreversible Action"
+          variant="danger"
+          confirmText={isDeletingYear ? 'Deleting...' : 'Delete Hunt'}
+          cancelText="Cancel"
+          isPending={isDeletingYear}
+          onConfirm={handleConfirmDeleteYear}
+          onClose={() => setYearToDelete(null)}
+        >
+          <div className="space-y-2">
+            <p className="text-sm text-slate-800 font-medium">
+              Are you sure you want to permanently delete the{' '}
+              <span className="font-bold text-slate-950 underline decoration-red-500">
+                DragonCon {yearToDelete}
+              </span>{' '}
+              hunt session?
+            </p>
+            <p className="text-xs text-red-600 font-mono">
+              This will permanently remove all targets, participant photo sightings, and settings for {yearToDelete}.
+            </p>
+          </div>
+        </RetroModal>
+      )}
 
       {/* Notice / Alert Modal */}
       {noticeModal && (
