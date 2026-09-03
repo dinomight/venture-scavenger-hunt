@@ -66,7 +66,12 @@ export default async function YearLayout({
 
   return (
     <div className="flex flex-col min-h-screen bg-venture-cream">
-      <HeaderNav currentYear={yearNumber} availableYears={allYears} isLocked={false} />
+      <HeaderNav
+        currentYear={yearNumber}
+        availableYears={allYears}
+        isLocked={false}
+        joinCode={sessionYear.joinCode}
+      />
       <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-6">
         {children}
       </main>
