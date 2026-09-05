@@ -20,7 +20,7 @@ export async function getTargetsForYear(yearNumber: number): Promise<TargetWithS
     .select()
     .from(targets)
     .where(eq(targets.yearId, yearRecord.id))
-    .orderBy(asc(targets.orderIndex), asc(targets.createdAt));
+    .orderBy(asc(targets.name));
 
   const allSubmissions = await db.select().from(submissions);
 
