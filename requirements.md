@@ -83,6 +83,15 @@ This project is a lightweight, mobile-first web application designed for a singl
   - Dedicated Session Editor Page (`/admin/:year`) for isolated management of session settings, join codes, target goals, single additions, bulk ingestion, and target checklist maintenance with direct navigation back to all sessions.
   - Protected by a master organizer clearance passphrase / PIN (default `VENTURE` or `ADMIN_PIN` env var) with session lock/unlock controls.
 
+### 4.6 Real-Time Synchronization & Live Updates
+- **Push Notifications via Pusher Channels**:
+  - Connected participant clients subscribe to the active hunt session channel (`hunt-{yearNumber}`).
+  - Server actions broadcast lightweight real-time events when targets are created, updated, or deleted, and when photo sightings are submitted or removed.
+  - Client components react to events by seamlessly refreshing session state (`router.refresh()`), ensuring mission gauges, checklist badges, and photo galleries update across all devices without manual page reloads.
+- **Graceful Fallback & Offline Resilience**:
+  - Real-time broadcasts degrade gracefully if Pusher environment variables are not configured or network connectivity drops.
+  - Client singleton connection management prevents redundant WebSocket connections during React Strict Mode and Hot Module Reloading (HMR).
+
 ---
 
 ## 5. Non-Functional Requirements
@@ -115,6 +124,7 @@ This project is a lightweight, mobile-first web application designed for a singl
 - Search and filter by completion status.
 - Lightbox / full-screen photo viewer.
 - Client-side image compression and direct blob upload with local fallback.
+- Real-time multi-device sync via Pusher Channels for instant progress, target, and photo updates.
 
 ### Out of Scope (Explicitly Deferred)
 - Multiple competing teams or competitive leaderboards.
@@ -131,6 +141,7 @@ This project is a lightweight, mobile-first web application designed for a singl
 - **Frontend / Framework**: Next.js (App Router), React, Tailwind CSS.
 - **Database & ORM**: SQLite (e.g., Turso / libSQL for serverless, or embedded SQLite) via Drizzle ORM or Prisma for simple schemas and zero-maintenance deployments.
 - **Media Storage**: Vercel Blob (or S3-compatible / Supabase Storage) with direct client uploads and `next/image` thumbnail optimization.
+- **Real-Time Push Notifications**: Pusher Channels (`pusher` server SDK + `pusher-js` client SDK) with graceful degradation when unconfigured.
 - **Deployment & Hosting**: Vercel (Hobby / Free Tier).
 
 ---

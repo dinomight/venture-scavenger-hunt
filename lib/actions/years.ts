@@ -5,6 +5,7 @@ import { years, targets, submissions } from '../db/schema';
 import { eq, desc, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { deleteBlobsIfNotReferenced } from '../utils/blob';
+import { broadcastHuntUpdate } from '../realtime/broadcast';
 
 export async function getAllYears() {
   const db = await getDb();
@@ -107,6 +108,7 @@ export async function updateYearSettings(
   safeRevalidate(`/admin/${yearNumber}`);
   safeRevalidate(`/${yearNumber}`);
   safeRevalidate(`/${yearNumber}/admin`);
+  await broadcastHuntUpdate(yearNumber, 'year-updated', { action: 'update', year: yearNumber });
   return await getYearByNumber(yearNumber);
 }
 
@@ -154,6 +156,7 @@ export async function deleteYearSession(yearNumber: number) {
   safeRevalidate(`/admin/${yearNumber}`);
   safeRevalidate(`/${yearNumber}`);
   safeRevalidate(`/${yearNumber}/admin`);
+  await broadcastHuntUpdate(yearNumber, 'year-updated', { action: 'delete', year: yearNumber });
 
   return { success: true, deletedYear: yearNumber };
 }

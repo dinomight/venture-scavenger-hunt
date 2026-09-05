@@ -17,6 +17,7 @@ import {
 import { updateYearSettings, deleteYearSession } from '@/lib/actions/years';
 import { lockAdminAction } from '@/lib/actions/auth';
 import { copyToClipboard } from '@/lib/utils/clipboard';
+import { useHuntRealtime } from '@/lib/realtime/useHuntRealtime';
 import type { Year } from '@/lib/db/schema';
 import {
   Plus,
@@ -52,6 +53,12 @@ export const SessionEditView: React.FC<SessionEditViewProps> = ({
   initialTargets,
 }) => {
   const router = useRouter();
+
+  // Real-time synchronization
+  useHuntRealtime(yearNumber, () => {
+    router.refresh();
+  });
+
   const [isBulkOpen, setIsBulkOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [targetToEdit, setTargetToEdit] = useState<TargetWithSubmissions | null>(null);

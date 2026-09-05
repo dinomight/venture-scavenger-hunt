@@ -5,6 +5,7 @@ import { submissions, targets } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { deleteBlobsIfNotReferenced } from '../utils/blob';
+import { broadcastHuntUpdate } from '../realtime/broadcast';
 
 function safeRevalidate(path: string) {
   try {
@@ -56,6 +57,10 @@ export async function createSubmissionAction(data: {
   safeRevalidate(`/${data.yearNumber}/admin`);
   safeRevalidate('/admin');
   safeRevalidate(`/admin/${data.yearNumber}`);
+  await broadcastHuntUpdate(data.yearNumber, 'submission-created', {
+    submissionId: id,
+    targetId: data.targetId,
+  });
   return newSubmission;
 }
 
@@ -94,5 +99,9 @@ export async function deleteSubmissionAction(submissionId: string, targetId: str
   safeRevalidate(`/${yearNumber}/admin`);
   safeRevalidate('/admin');
   safeRevalidate(`/admin/${yearNumber}`);
+  await broadcastHuntUpdate(yearNumber, 'submission-deleted', {
+    submissionId,
+    targetId,
+  });
   return { success: true };
 }

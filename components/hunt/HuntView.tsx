@@ -10,6 +10,7 @@ import { PhotoUploadModal } from '../submissions/PhotoUploadModal';
 import { Lightbox, type LightboxPhoto } from '../submissions/Lightbox';
 import { type TargetWithSubmissions } from '@/lib/actions/targets';
 import { deleteSubmissionAction } from '@/lib/actions/submissions';
+import { useHuntRealtime } from '@/lib/realtime/useHuntRealtime';
 import { Search } from 'lucide-react';
 
 interface HuntViewProps {
@@ -25,6 +26,11 @@ export const HuntView: React.FC<HuntViewProps> = ({
 }) => {
   const router = useRouter();
   const targets = initialTargets;
+
+  // Real-time synchronization
+  useHuntRealtime(yearNumber, () => {
+    router.refresh();
+  });
 
   // Filters & Views
   const [searchQuery, setSearchQuery] = useState('');

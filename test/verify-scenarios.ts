@@ -5,6 +5,7 @@ import { getTargetsForYear, createTarget, updateTarget, bulkImportTargets, delet
 import { createSubmissionAction, deleteSubmissionAction } from '../lib/actions/submissions';
 import { getRankMilestone } from '../lib/utils/rank-titles';
 import { validateAdminPin } from '../lib/session';
+import { broadcastHuntUpdate, getHuntChannelName } from '../lib/realtime/broadcast';
 
 async function runTests() {
   console.log('--- STARTING VERIFICATION TESTS ---');
@@ -212,6 +213,16 @@ async function runTests() {
     throw new Error('Targets for deleted year 2099 were not cleaned up');
   }
   console.log('✓ Hunt session 2099, associated targets, and photo sightings were cleanly deleted.');
+
+  // 11. Test Real-time Broadcast helpers
+  console.log('11. Testing Real-time channel naming and broadcast resilience...');
+  const channel = getHuntChannelName(2026);
+  if (channel !== 'hunt-2026') {
+    throw new Error(`Expected hunt-2026 channel name, got ${channel}`);
+  }
+  // Should safely execute without throwing even if Pusher keys are unset
+  await broadcastHuntUpdate(2026, 'targets-updated', { test: true });
+  console.log('✓ Real-time broadcast gracefully executed without error.');
 
   console.log('\n========================================');
   console.log('ALL VERIFICATION TESTS PASSED SUCCESSFULLY!');

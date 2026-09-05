@@ -6,6 +6,7 @@ import { eq, asc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { getYearByNumber } from './years';
 import { deleteBlobsIfNotReferenced } from '../utils/blob';
+import { broadcastHuntUpdate } from '../realtime/broadcast';
 
 export interface TargetWithSubmissions extends Target {
   submissions: Submission[];
@@ -79,6 +80,7 @@ export async function createTarget(data: {
   safeRevalidate(`/${data.yearNumber}/admin`);
   safeRevalidate('/admin');
   safeRevalidate(`/admin/${data.yearNumber}`);
+  await broadcastHuntUpdate(data.yearNumber, 'targets-updated', { action: 'create', targetId: newTarget.id });
   return newTarget;
 }
 
@@ -124,6 +126,7 @@ export async function bulkImportTargets(
   safeRevalidate(`/${yearNumber}/admin`);
   safeRevalidate('/admin');
   safeRevalidate(`/admin/${yearNumber}`);
+  await broadcastHuntUpdate(yearNumber, 'targets-updated', { action: 'bulk-import', count: newTargets.length });
   return { count: newTargets.length };
 }
 
@@ -150,6 +153,7 @@ export async function updateTarget(
   safeRevalidate(`/${yearNumber}/admin`);
   safeRevalidate('/admin');
   safeRevalidate(`/admin/${yearNumber}`);
+  await broadcastHuntUpdate(yearNumber, 'targets-updated', { action: 'update', targetId });
   return { success: true };
 }
 
@@ -180,5 +184,6 @@ export async function deleteTarget(targetId: string, yearNumber: number) {
   safeRevalidate(`/${yearNumber}/admin`);
   safeRevalidate('/admin');
   safeRevalidate(`/admin/${yearNumber}`);
+  await broadcastHuntUpdate(yearNumber, 'targets-updated', { action: 'delete', targetId });
   return { success: true };
 }
