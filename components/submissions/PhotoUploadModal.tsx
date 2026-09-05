@@ -10,6 +10,7 @@ import { type TargetWithSubmissions } from '../../lib/actions/targets';
 import {
   Camera,
   Upload,
+  Image as ImageIcon,
   X,
   User,
   MessageSquare,
@@ -46,7 +47,18 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
   const [statusMessage, setStatusMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleClearPhoto = () => {
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setFile(null);
+    setPreviewUrl(null);
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   // Clean up object preview URL
   useEffect(() => {
@@ -139,8 +151,7 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
 
       setTimeout(() => {
         setIsUploading(false);
-        setFile(null);
-        setPreviewUrl(null);
+        handleClearPhoto();
         setCaption('');
         onSuccess();
         onClose();
@@ -185,7 +196,7 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
             {/* Camera / Photo Trigger */}
             <div>
               <input
-                ref={fileInputRef}
+                ref={cameraInputRef}
                 type="file"
                 accept="image/*"
                 capture="environment"
@@ -193,23 +204,49 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                 className="hidden"
                 id="camera-file-input"
               />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+                id="gallery-file-input"
+              />
 
               {!previewUrl ? (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full flex flex-col items-center justify-center p-6 border-3 border-dashed border-slate-400 bg-white hover:bg-amber-50/40 rounded-lg cursor-pointer transition-all active:scale-[0.99]"
-                >
-                  <div className="h-12 w-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-2 border-2 border-slate-900 shadow-retro-sm">
-                    <Camera className="h-6 w-6" />
-                  </div>
-                  <span className="text-sm font-black uppercase tracking-wider text-slate-900">
-                    Snap or Pick Photo
-                  </span>
-                  <span className="text-[11px] font-mono text-slate-500 mt-1">
-                    Direct camera capture or gallery
-                  </span>
-                </button>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="flex flex-col items-center justify-center p-5 border-3 border-dashed border-slate-400 bg-white hover:bg-amber-50/40 rounded-lg cursor-pointer transition-all active:scale-[0.99] text-center group"
+                  >
+                    <div className="h-11 w-11 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-2 border-2 border-slate-900 shadow-retro-sm group-hover:scale-105 transition-transform">
+                      <Camera className="h-5 w-5" />
+                    </div>
+                    <span className="text-xs font-black uppercase tracking-wider text-slate-900">
+                      Take Picture
+                    </span>
+                    <span className="text-[11px] font-mono text-slate-500 mt-0.5">
+                      Use camera
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex flex-col items-center justify-center p-5 border-3 border-dashed border-slate-400 bg-white hover:bg-amber-50/40 rounded-lg cursor-pointer transition-all active:scale-[0.99] text-center group"
+                  >
+                    <div className="h-11 w-11 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mb-2 border-2 border-slate-900 shadow-retro-sm group-hover:scale-105 transition-transform">
+                      <ImageIcon className="h-5 w-5" />
+                    </div>
+                    <span className="text-xs font-black uppercase tracking-wider text-slate-900">
+                      Upload Photo
+                    </span>
+                    <span className="text-[11px] font-mono text-slate-500 mt-0.5">
+                      Photos & files
+                    </span>
+                  </button>
+                </div>
               ) : (
                 <div className="relative rounded-lg overflow-hidden border-2 border-slate-900 bg-slate-950 shadow-retro">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -220,10 +257,7 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                   />
                   <button
                     type="button"
-                    onClick={() => {
-                      setFile(null);
-                      setPreviewUrl(null);
-                    }}
+                    onClick={handleClearPhoto}
                     className="absolute top-2 right-2 p-1.5 bg-black/80 text-white rounded-full hover:bg-red-600 transition-colors"
                     title="Change Photo"
                   >
